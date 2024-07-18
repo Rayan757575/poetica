@@ -7,8 +7,8 @@ export const TextScreen = () =>{
     return (
         <ScreenScrollContainer withPadding>
             <IconButton iconName={'arrow-back'} />
-            <TextInput placeholder="Title"></TextInput>
-            <TextInput placeholder="Write here"></TextInput>
+            <TextInput placeholder="Title" multiline ></TextInput>
+            <TextInput placeholder="Write here" multiline></TextInput>
         </ScreenScrollContainer>
     )
 }
