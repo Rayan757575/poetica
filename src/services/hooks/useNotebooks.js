@@ -17,7 +17,9 @@ export const useNotebooks = () => {
             }
             const JsonValue = JSON.stringify(newDb)
             await AsyncStorage.setItem(DB_KEY, JsonValue)
+            console.log({ newDb })
             return newDb
+            
         } catch (error) {
             console.log({ error })
             return { error }

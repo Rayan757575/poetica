@@ -28,7 +28,7 @@ export const usePoems = () => {
         let db
         const value = await AsyncStorage.getItem(DB_KEY)
         if (value !== null) {
-            return value
+            return db
         } else {
             return []
         }

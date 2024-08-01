@@ -9,7 +9,7 @@ export const Home = () => {
     const { createNotebook, getNotebooks, deleteNotebook } = useNotebooks()
     const item = [
         id = 0,
-        name = 'my poems',
+        name = 'my poems32',
         wallpaper= '~/assets/wallpaper1.jpg'
     ]
 
