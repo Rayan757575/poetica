@@ -1,6 +1,7 @@
 import { Container, PoemsList, SubTitle } from "~/components"
-import { useNotebookStore } from "~/services/stores"
-
+import { usePoems } from "~/services/hooks"
+import { useNotebookStore } from "~/services/stores" //para pegar o titulo do notebook selecionado
+import { useEffect, useState } from 'react'
 
 const POEMS_DATA = [
     {
@@ -19,17 +20,30 @@ const POEMS_DATA = [
         text: 'Textjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj3'
     },
 ]
-
 //refatorar o segundo container como um organismo
 
 export const Poems = () => {
+    const [poemsList, setPoemsList] = useState([])
+    const { getPoems } = usePoems()
+    
+    const callGetPoems = async () => {
+      const poems = await getPoems()
+      setPoemsList(poems)
+    }
+    useEffect(() => {
+      const unsubscribe = navigation.addListener('focus', () => {
+        callGetPoems()
+      })
+      return unsubscribe;
+    }, [])
     const { selectedNotebook } = useNotebookStore()
+    // usar o poemsList no luggar de poems data
     return (
         <Container >
             <Container marginTop={24} h={88} bg={'light'} justify={'center'} align={'center'}>
                 <SubTitle>{selectedNotebook.title}</SubTitle>
             </Container>
-            <PoemsList data={POEMS_DATA} />
+            <PoemsList data={POEMS_DATA} /> 
         </Container>
     )
 }

@@ -44,9 +44,10 @@ export const NotebookScreen = ({ navigation }) => {
   }, [])
 
 
+    // usar o notebooks no lugar de notebook data
   return (
     <Container >
-      <Container marginLeft={24} marginTop={24} h={88} direction={'row'} bg={'light'} align={'center'} >
+      <Container marginLeft={44} h={108} direction={'row'} bg={'light'} align={'center'} >
         <Text fontFamily='medium' size={28}>Notebooks</Text>
       </Container>
       <NotebooksList data={NOTEBOOKS_DATA} />
