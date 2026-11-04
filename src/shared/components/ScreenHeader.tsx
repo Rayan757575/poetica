@@ -7,21 +7,28 @@ import { moderateScale } from '@/shared/theme/metrics';
 type ScreenHeaderProps = {
   title: string;
   rightSlot?: ReactNode;
+  /** Borda inferior quase imperceptível, ligada por padrão. */
+  showBorder?: boolean;
+  /** Cor/opacidade da borda — passe outro valor (ou showBorder={false}) pra mudar/remover. */
+  borderColor?: string;
 };
 
-// Base de qualquer tela com título no topo (Home, Notebooks, e agora
-// o notebook também). Sem bg próprio — herda da tela, pra nunca mais
-// criar aquela faixa de cor destoando do resto da página. O respiro
-// do topo vem do safe-area-context, não de um pt-16 chutado, então
-// fica consistente em qualquer aparelho. Isso também já é a base pra
-// quando isso virar uma nav-bar fixa de verdade.
-export function ScreenHeader({ title, rightSlot }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  rightSlot,
+  showBorder = true,
+  borderColor = 'rgba(22,22,22,0.08)',
+}: ScreenHeaderProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View
-      style={{ paddingTop: insets.top + moderateScale(12) }}
-      className="flex-row items-center justify-between px-6 pb-4"
+      style={{
+        paddingTop: insets.top + moderateScale(12),
+        borderBottomWidth: showBorder ? 1 : 0,
+        borderBottomColor: borderColor,
+      }}
+      className="flex-row items-center justify-between bg-white px-6 pb-4"
     >
       <Text className="font-medium text-3xl text-dark">{title}</Text>
       {rightSlot}

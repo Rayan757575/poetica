@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { Image, Pressable, Text } from 'react-native';
-const notebookDefaultImage = require('../../../../assets/images/vangogh-2.jpg');
+const notebookDefaultImage = require('@/assets/images/vangogh-2.jpg');
 
 import { scale } from '@/shared/theme/metrics';
 import type { Notebook } from '../types';

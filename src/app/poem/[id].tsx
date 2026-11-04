@@ -1,17 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { usePoemsStore } from '@/features/poems/store/usePoemsStore';
 
-// No v1, o botão de voltar chamava createNewPoem() — uma função que
-// estava inteira comentada, ou seja, o texto nunca era salvo. Aqui o
-// título e o conteúdo são salvos de verdade ao sair da tela.
-//
-// TODO (fase 3): trocar os TextInput por <RichText> do
-// @10play/tentap-editor, com a extensão custom de sinônimos no menu
-// de seleção.
 export default function PoemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const poem = usePoemsStore((state) => state.poems.find((p) => p.id === id));
@@ -20,21 +13,33 @@ export default function PoemScreen() {
   const [title, setTitle] = useState(poem?.title ?? '');
   const [content, setContent] = useState(poem?.content ?? '');
 
+  // Sempre com o valor mais recente, pra o cleanup do useEffect abaixo
+  // não enxergar um title/content "velho" (closure stale).
+  const titleRef = useRef(title);
+  const contentRef = useRef(content);
+  titleRef.current = title;
+  contentRef.current = content;
+
   useEffect(() => {
     setTitle(poem?.title ?? '');
     setContent(poem?.content ?? '');
   }, [poem?.id]);
 
-  const saveAndGoBack = () => {
-    if (id) {
-      updatePoem(id, { title, content });
-    }
-    router.back();
-  };
+  // Salva ao desmontar a tela — cobre a seta de voltar, o botão físico
+  // de voltar do Android e o gesto de arrastar, já que todos eles
+  // desmontam esse componente (antes só a seta disparava o save).
+  useEffect(() => {
+    return () => {
+      if (id) {
+        updatePoem(id, { title: titleRef.current, content: contentRef.current });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   return (
     <View className="flex-1 bg-white px-6 pt-16">
-      <Pressable onPress={saveAndGoBack} className="mb-6">
+      <Pressable onPress={() => router.back()} className="mb-6">
         <Ionicons name="arrow-back" size={24} color="#161616" />
       </Pressable>
       <TextInput
@@ -49,7 +54,7 @@ export default function PoemScreen() {
         multiline
         value={content}
         onChangeText={setContent}
-        className="mt-4 flex-1 font-regular text-base text-dark"
+        className="mt-4 flex-1 font-reading text-base text-dark"
         textAlignVertical="top"
       />
     </View>

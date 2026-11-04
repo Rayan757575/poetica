@@ -11,7 +11,7 @@ export default function WelcomeScreen() {
   return (
     <View className="flex-1 bg-white">
       <ImageBackground
-        source={require('../../assets/images/wallpaper1.jpg')}
+        source={require('@/assets/images/wallpaper1.jpg')}
         style={{ width: '100%', height: 320 }}
       >
         <LinearGradient
@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
           className="h-full w-full items-center justify-end pb-4"
         >
           <Image
-            source={require('../../assets/images/logoPoetica.png')}
+            source={require('@/assets/images/logoPoetica.png')}
             style={{ width: 100, height: 100 }}
             resizeMode="contain"
           />

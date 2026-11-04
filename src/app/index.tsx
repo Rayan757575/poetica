@@ -13,7 +13,7 @@ export default function SplashRoute() {
   return (
     <View className="flex-1 items-center justify-center bg-white">
       <Image
-        source={require('../../assets/images/logoPoetica.png')}
+        source={require('@/assets/images/logoPoetica.png')}
         style={{ width: 200, height: 200 }}
         resizeMode="contain"
       />

@@ -3,4 +3,5 @@ export type Notebook = {
   title: string;
   wallpaper?: string;
   createdAt: string;
+  createdBy: string;
 };

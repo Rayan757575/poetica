@@ -1,17 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 
-// Mesmas duas tabs do BottomBar customizado do v1 (Home + Notebooks),
-// agora usando o Tabs nativo do Expo Router em vez de um BottomBar
-// escrito à mão.
+import { colors } from '@/shared/theme/colors';
+
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#0a63f4',
-        tabBarInactiveTintColor: '#000000',
-        tabBarStyle: { backgroundColor: '#FFFFFF' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.dark,
+        tabBarStyle: { backgroundColor: colors.white },
       }}
     >
       <Tabs.Screen
@@ -32,6 +31,10 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Faz parte do navegador de tabs (pra manter o navbar visível),
+          mas href: null tira esse item da própria tab bar — ele só é
+          alcançado a partir do card de um notebook. */}
+      <Tabs.Screen name="notebook/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
