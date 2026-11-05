@@ -9,8 +9,14 @@ type CreateCardProps = {
   onPress: () => void;
   size?: number;
   radius?: number;
-  textPosition?: 'below' | 'inside';
+  // 'row' espelha NotebookListItem/PoemListItem (miniatura + texto ao lado),
+  // usado quando o viewMode da tela não é 'albums'.
+  textPosition?: 'below' | 'inside' | 'row';
 };
+
+// Mesmo tamanho/raio da miniatura de NotebookListItem e PoemListItem.
+const ROW_THUMB_SIZE = scale(56);
+const ROW_THUMB_RADIUS = 8;
 
 export function CreateCard({
   label,
@@ -19,6 +25,20 @@ export function CreateCard({
   radius = 30,
   textPosition = 'below',
 }: CreateCardProps) {
+  if (textPosition === 'row') {
+    return (
+      <Pressable onPress={onPress} className="mb-4 flex-row items-center">
+        <View
+          className="items-center justify-center border-2 border-dashed border-primary bg-backgroundTabs"
+          style={{ width: ROW_THUMB_SIZE, height: ROW_THUMB_SIZE, borderRadius: ROW_THUMB_RADIUS }}
+        >
+          <Ionicons name="add" size={Math.round(ROW_THUMB_SIZE * 0.5)} color={colors.primary} />
+        </View>
+        <Text className="ml-3 font-regular text-base text-primary">{label}</Text>
+      </Pressable>
+    );
+  }
+
   const boxSize = scale(size);
 
   return (
