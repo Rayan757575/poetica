@@ -1,6 +1,10 @@
 export const colors = {
   // Cor de ação/marca — usada no app inteiro (splash, CTA, ícones, cards de poema)
   primary: '#0a63f4',
+  // Variantes de interação, cursor e seleção de texto
+  primaryPressed: '#084EC2', // feedback tátil de peso ao pressionar ações primárias
+  cursor: '#3B7BE3', // guia o olho no fundo sépia sem a vibração elétrica do primary puro
+  selection: '#C8DCF8', // azul aquarelado que ilumina a palavra selecionada sobre o papel quente
 
   // Neutros já usados nas telas atuais
   white: '#FFFFFF',
@@ -19,6 +23,16 @@ export const colors = {
   surfaceBar: '#FCFBF8',
   // Ícones/textos secundários discretos (cinza quente, combina com os fundos sépia)
   muted: '#6B665F',
+  // Hierarquia da "tinta" e neutros silenciosos
+  placeholder: '#A39C93', // grafite claro e quente — reduz o peso da página em branco
+  border: '#E6E1D8', // divisórias quentes com aspecto de corte de papelaria
+
+  // Superfícies de sobreposição (modais, bottom sheets e popovers)
+  surfaceElevated: '#FFFDF9', // branco aquecido que não parece frio sobre o fundo sépia
+  backdrop: 'rgba(27, 22, 20, 0.45)', // escurecimento com matriz quente do ink
+
+  // Semântica de ação destrutiva (carmim/terracota queimado — alerta sem estresse visual)
+  danger: '#C84B31',
 
   // Tons claros derivados do `primary` — fundos suaves que conversam com
   // o azul da marca (ex.: degradê da Welcome) sem competir com os botões.
