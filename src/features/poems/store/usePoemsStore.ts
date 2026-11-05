@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -14,7 +15,7 @@ const DEFAULT_AUTHOR = 'você'; // fixo por enquanto — métricas futuras
 export const DEFAULT_POEM_TITLE = 'Novo poema';
 
 // Id reservado da rota do editor para um poema ainda não salvo (rascunho).
-// Ids reais são Date.now(), então não há colisão.
+// Ids reais são UUIDs (expo-crypto), então não há colisão.
 export const NEW_POEM_ID = 'new';
 
 function titleOrDefault(title: string): string {
@@ -45,7 +46,7 @@ export const usePoemsStore = create<PoemsState>()(
       addPoem: (notebookId, data) => {
         const now = new Date().toISOString();
         const poem: Poem = {
-          id: Date.now().toString(),
+          id: Crypto.randomUUID(),
           notebookId,
           title: titleOrDefault(data.title),
           content: data.content,
@@ -62,20 +63,34 @@ export const usePoemsStore = create<PoemsState>()(
         return poem;
       },
       updatePoem: (id, patch) =>
-        set((state) => ({
-          poems: state.poems.map((poem) =>
-            poem.id === id
-              ? {
-                  ...poem,
-                  ...patch,
-                  ...(patch.title !== undefined && { title: titleOrDefault(patch.title) }),
-                  updatedAt: new Date().toISOString(),
-                  updatedBy: DEFAULT_AUTHOR,
-                }
-              : poem
-          ),
-          recentPoemIds: bumpRecent(state.recentPoemIds, id),
-        })),
+        set((state) => {
+          const current = state.poems.find((poem) => poem.id === id);
+          if (!current) return state;
+
+          const nextTitle = patch.title !== undefined ? titleOrDefault(patch.title) : current.title;
+          const nextContent = patch.content !== undefined ? patch.content : current.content;
+
+          // Se título e conteúdo finais continuam idênticos ao que já estava
+          // salvo, evita atualizar `updatedAt` e poupa escrita no AsyncStorage.
+          if (nextTitle === current.title && nextContent === current.content) {
+            return state;
+          }
+
+          return {
+            poems: state.poems.map((poem) =>
+              poem.id === id
+                ? {
+                    ...poem,
+                    title: nextTitle,
+                    content: nextContent,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: DEFAULT_AUTHOR,
+                  }
+                : poem
+            ),
+            recentPoemIds: bumpRecent(state.recentPoemIds, id),
+          };
+        }),
       removePoem: (id) =>
         set((state) => ({
           poems: state.poems.filter((poem) => poem.id !== id),
