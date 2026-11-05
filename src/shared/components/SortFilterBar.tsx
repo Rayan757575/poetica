@@ -14,6 +14,10 @@ type SortFilterBarProps = {
   borderColor?: string;
 };
 
+// Faixa colada no ScreenHeader: fundo `surfaceBar` (tom entre o branco do
+// header e o fundo da tela), ícones em `muted` e borda só embaixo (com
+// sombra leve) pra dar a ideia de que ela fica "por cima" do conteúdo.
+// O zIndex garante que a sombra não seja coberta pela lista logo abaixo.
 export function SortFilterBar({
   onSortPress,
   viewMode,
@@ -30,16 +34,16 @@ export function SortFilterBar({
             : subtleDividerStyle
           : undefined
       }
-      className="flex-row items-center justify-between px-6 py-3"
+      className="z-10 flex-row items-center justify-between bg-surfaceBar px-6 py-2"
     >
-      <Pressable onPress={onSortPress}>
-        <Ionicons name="swap-vertical-outline" size={22} color={colors.dark} />
+      <Pressable onPress={onSortPress} hitSlop={12}>
+        <Ionicons name="swap-vertical-outline" size={20} color={colors.muted} />
       </Pressable>
-      <Pressable onPress={onToggleViewMode}>
+      <Pressable onPress={onToggleViewMode} hitSlop={12}>
         <Ionicons
           name={viewMode === 'albums' ? 'list-outline' : 'albums-outline'}
-          size={22}
-          color={colors.dark}
+          size={20}
+          color={colors.muted}
         />
       </Pressable>
     </View>

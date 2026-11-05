@@ -9,9 +9,16 @@ export const colors = {
   dark: '#161616',
 
   // Fundos por tempo de permanência na tela (pesquisa de fadiga ocular)
-  backgroundTabs: '#F7F5F1',     // Home / Notebooks
-  backgroundReading: '#FBF6EE',  // tela do notebook + editor (sépia)
-  ink: '#2B2320',                 // texto do corpo do editor
+  backgroundTabs: '#F7F5F1', // Home / Notebooks
+  backgroundReading: '#FBF6EE', // tela do notebook + editor (sépia)
+  ink: '#2B2320', // texto do corpo do editor
+
+  // Faixa intermediária entre o header branco e o fundo das telas
+  // (SortFilterBar e bloco de resumo da Home) — mais clara que
+  // backgroundTabs/backgroundReading e mais quente que o branco puro.
+  surfaceBar: '#FCFBF8',
+  // Ícones/textos secundários discretos (cinza quente, combina com os fundos sépia)
+  muted: '#6B665F',
 
   // Paleta curada pra cor de capa do notebook (escolha do usuário)
   notebookAccents: {

@@ -24,10 +24,22 @@ export default function NotebookScreen() {
   const [sortKey, setSortKey] = useState('recentlyUpdated');
 
   const allPoems = usePoemsStore((state) => state.poems);
-  const poems = useMemo(
-    () => allPoems.filter((poem) => poem.notebookId === id).slice().reverse(),
-    [allPoems, id]
-  );
+  // Filtra o notebook e ordena conforme a chave do SortOptionsSheet.
+  // `filter` já devolve um array novo, então `sort` não muta o store.
+  const poems = useMemo(() => {
+    const notebookPoems = allPoems.filter((poem) => poem.notebookId === id);
+    switch (sortKey) {
+      case 'alphabetical':
+        return notebookPoems.sort((a, b) =>
+          a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })
+        );
+      case 'creationOrder':
+        return notebookPoems.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+      case 'recentlyUpdated':
+      default:
+        return notebookPoems.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+    }
+  }, [allPoems, id, sortKey]);
   const addPoem = usePoemsStore((state) => state.addPoem);
 
   const createPoem = () => {
@@ -46,7 +58,7 @@ export default function NotebookScreen() {
 
   return (
     <View className="flex-1 bg-backgroundReading">
-      <ScreenHeader title={notebook?.title ?? 'Notebook'} />
+      <ScreenHeader title={notebook?.title ?? 'Notebook'} showBorder={false} />
       <SortFilterBar
         viewMode={viewMode}
         onToggleViewMode={() => setViewMode((mode) => (mode === 'list' ? 'albums' : 'list'))}

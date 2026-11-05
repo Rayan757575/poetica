@@ -25,7 +25,23 @@ export default function NotebooksScreen() {
     addNotebook(`My poems ${notebooks.length + 1}`);
   };
 
-  const orderedNotebooks = useMemo(() => notebooks.slice().reverse(), [notebooks]);
+  // Ordenação por chave do SortOptionsSheet. `slice()` evita mutar o array
+  // do store. Com poucos notebooks, ordenar a cada mudança é barato; se a
+  // escala crescer, vale memoizar por chave ou ordenar já no store.
+  const orderedNotebooks = useMemo(() => {
+    const sorted = notebooks.slice();
+    switch (sortKey) {
+      case 'alphabetical':
+        return sorted.sort((a, b) =>
+          a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' })
+        );
+      case 'creationOrder':
+        return sorted.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+      case 'recent':
+      default:
+        return sorted.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    }
+  }, [notebooks, sortKey]);
 
   const gridData: GridItem[] = [
     { kind: 'create' },
@@ -36,6 +52,7 @@ export default function NotebooksScreen() {
     <View className="flex-1 bg-backgroundTabs">
       <ScreenHeader
         title="Notebooks"
+        showBorder={false}
         rightSlot={
           <View className="flex-row items-center gap-4">
             <Pressable onPress={() => {}}>
