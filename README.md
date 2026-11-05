@@ -50,20 +50,23 @@ Path aliases (resolvidos nativamente pelo Metro a partir do `tsconfig.json`, sem
 src/
   app/                      # Expo Router: só rotas/composição
     index.tsx               # Só redireciona para /welcome (a splash é a nativa)
-    welcome.tsx             # Onboarding (imagem + gradiente, UI estática, sem auth)
+    welcome.tsx             # Onboarding (degradê dinâmico, UI estática, sem auth)
     (tabs)/
-      _layout.tsx           # Tabs (Home, Notebooks) + notebook/[id] com href:null
+      _layout.tsx           # Tabs (Home, Notebooks)
       home.tsx
-      notebooks.tsx
-      notebook/[id].tsx     # Dentro de (tabs) para manter a navbar
-    poem/[id].tsx           # Editor, fora de (tabs): sem navbar
+      notebooks/
+        _layout.tsx         # Stack aninhado (lista → detalhe com transição nativa + navbar)
+        index.tsx           # Lista de notebooks
+        [id].tsx            # Detalhe do notebook (poemas)
+    poem/[id].tsx           # Editor (ou rascunho em /poem/new), fora de (tabs): sem navbar
     +not-found.tsx
   features/
     notebooks/              # components, store/useNotebooksStore.ts, types.ts
-    poems/                  # components, store/usePoemsStore.ts, types/
+    poems/                  # components (inclui PoemEditorHeader), store/usePoemsStore.ts, types/
   shared/
-    components/             # ScreenHeader, SortFilterBar, SortOptionsSheet, CreateCard
+    components/             # ScreenHeader, SortFilterBar, SortOptionsSheet, CreateCard, ProcessingFlash
     lib/                    # storage.ts, api.ts
+    store/                  # useScreenPreferencesStore.ts (persiste viewMode e sortKey)
     theme/                  # colors, typography, metrics, elevation, index
   global.css
 assets/images/              # logo, wallpapers, ícones
@@ -85,6 +88,7 @@ Os tokens em `src/shared/theme/` são a fonte única de verdade: `colors.ts` e `
 | `ink` | `#2B2320` | Texto do corpo do editor |
 | `surfaceBar` | `#FCFBF8` | Faixa entre o header e o conteúdo (`SortFilterBar`, resumo da Home) |
 | `muted` | `#6B665F` | Ícones e textos secundários discretos |
+| `primaryTint` | `soft` (`#EEF4FF`), `mid` (`#D9E7FE`) | Tons claros derivados do `primary` (degradê dinâmico da Welcome) |
 | `notebookAccents` | terracotta, sage, mustard, dustyBlue | Cores de capa (ainda sem UI) |
 
 Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos quentes reduzem a fadiga ocular em leitura longa; Lemonada (arredondada) fica na marca e nos títulos, e Literata no corpo por ser desenhada para leitura em tela.
@@ -93,15 +97,16 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 
 ### Notebooks
 - Existe o notebook fixo **"Sem categoria"** (`UNCATEGORIZED_NOTEBOOK_ID = 'uncategorized'`). Ele não pode ser removido, é seedado como primeiro item e reinjetado via `merge` do `persist` se faltar.
-- `createdBy`/`updatedBy`: `"você"` para o que o usuário cria e `"sistema"` para "Sem categoria". Não são exibidos na UI.
-- Listas ordenadas do **mais recente para o mais antigo** (`slice().reverse()`).
+- O contador de criação de novos notebooks ignora "Sem categoria", começando em **"My poems 1"**.
+- `createdBy`/`updatedBy`: `"você"` para o que o usuário cria e `"sistema"` para "Sem categoria". `createdBy` é exibido nas listas (`NotebookListItem` e `PoemListItem`).
+- Ordenação persistida por tela (`useScreenPreferencesStore`): em Notebooks suporta `recent` (`createdAt` mais recente primeiro), `alphabetical` e `creationOrder`; no detalhe do notebook suporta `recentlyUpdated` (`updatedAt`), `alphabetical` e `creationOrder`.
 - A migração retroativa de `createdBy` (`migrateNotebooks`) foi removida a pedido do dono. Não reintroduzir sem pedir.
 
 ### Poemas
 - Campos de `Poem`: `id, notebookId, title, content, type, createdAt, createdBy, updatedAt, updatedBy`.
 - `PoemType = 'soneto' | 'haicai' | 'trova' | 'livre'`, com `'livre'` como padrão. Cada tipo tem um arquivo de metadados em `features/poems/types/` contendo só `{ id }`. Propriedades específicas ainda não foram definidas.
-- Todo poema novo se chama **"Novo poema"**, e `addPoem(notebookId)` não recebe título.
-- O editor salva no **unmount** (cleanup de `useEffect`, lendo refs), cobrindo seta, botão físico e gesto de voltar.
+- Criação em modo **rascunho** (`/poem/new?notebookId=...`): nada é salvo no store ao abrir o editor. O título padrão **"Novo poema"** fica como `placeholder`; ao sair do editor, o poema só é criado se título ou conteúdo tiverem algo escrito (se o título ficar em branco, recebe `"Novo poema"`).
+- O editor salva uma única vez no **unmount** (cleanup de `useEffect`, lendo refs atualizados nos handlers), cobrindo seta, botão físico e gesto de voltar sem custo por tecla digitada.
 - `recentPoemIds` (últimos 5 poemas) é um array simples e não um LRU: com N=5 a diferença é irrelevante e serializa direto em JSON.
 
 ### Navegação e visual
@@ -123,19 +128,18 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 ## Estado atual
 
 **Funciona**
-- Fluxo Splash → Welcome → Tabs (Home/Notebooks) → Notebook → Editor.
-- Criação e listagem de notebooks e poemas, com edição de título e conteúdo.
+- Fluxo Splash → Welcome → Tabs (Home/Notebooks) → Notebook (transição nativa em Stack aninhado) → Editor.
+- Criação e listagem de notebooks e poemas (com rascunho que evita poemas vazios), edição de título e conteúdo.
 - Notebook "Sem categoria" protegido.
-- Toggle lista/grade.
-- Componentes compartilhados e tokens centralizados.
+- Toggle lista/grade (`CreateCard` acompanha o modo com `textPosition="row"` na lista) e ordenação com feedback visual (`ProcessingFlash`) e persistência (`useScreenPreferencesStore`).
+- Métricas padronizadas de cards e miniaturas em `src/shared/theme/metrics.ts` (`cardSize`, `cardRadius`, `listThumbSize`, `listThumbRadius`).
+- Componentes compartilhados (`ScreenHeader`, `PoemEditorHeader`, `SortFilterBar`, `SortOptionsSheet`, `CreateCard`, `ProcessingFlash`) e tokens centralizados.
 
 **Pendente ou incerto**
-- Variante `textPosition="row"` do `CreateCard` (aprovada, ainda não escrita). É a próxima tarefa.
-- Ordenação (`SortOptionsSheet`) funciona em Notebooks (`recent` por `createdAt`, `alphabetical`, `creationOrder`) e no notebook (`recentlyUpdated` por `updatedAt`, `alphabetical`, `creationOrder`).
-- Ícones de busca e "+" em `ScreenHeader` de Notebooks estão inertes.
+- Ícones de busca e "+" em `ScreenHeader` de Notebooks, e ícones de download e menu em `PoemEditorHeader`, estão inertes.
 - Sem autenticação real.
 - Sem UI para capa de notebook (`wallpaper` cai sempre em `vangogh-2.jpg`) nem para `notebookAccents`.
-- Lista de "últimos poemas" na Home: voltou a ser renderizada (horizontal, logo após o `CreateCard`). **Validar em build real.**
+- Lista de "últimos poemas" na Home: renderizada horizontalmente logo após o `CreateCard`. **Validar em build real.**
 
 ## Roadmap
 
