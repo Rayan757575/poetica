@@ -2,10 +2,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { usePoemsStore } from '@/features/poems/store/usePoemsStore';
+import { colors } from '@/shared/theme/colors';
+import { moderateScale } from '@/shared/theme/metrics';
 
 export default function PoemScreen() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const poem = usePoemsStore((state) => state.poems.find((p) => p.id === id));
   const updatePoem = usePoemsStore((state) => state.updatePoem);
@@ -37,24 +41,33 @@ export default function PoemScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // TODO: ao selecionar uma palavra, abrir menu com busca de sinônimos
+  // (feature central do produto). Candidato: @10play/tentap-editor.
   return (
-    <View className="flex-1 bg-white px-6 pt-16">
-      <Pressable onPress={() => router.back()} className="mb-6">
-        <Ionicons name="arrow-back" size={24} color="#161616" />
+    <View
+      className="flex-1 bg-backgroundReading px-6"
+      style={{ paddingTop: insets.top + moderateScale(12) }}
+    >
+      <Pressable onPress={() => router.back()} className="mb-6" hitSlop={12}>
+        <Ionicons name="arrow-back" size={24} color={colors.ink} />
       </Pressable>
       <TextInput
         placeholder="Title"
+        placeholderTextColor={colors.muted}
+        selectionColor={colors.primary}
         multiline
         value={title}
         onChangeText={setTitle}
-        className="font-medium text-2xl text-dark"
+        className="font-medium text-2xl text-ink"
       />
       <TextInput
         placeholder="Write here"
+        placeholderTextColor={colors.muted}
+        selectionColor={colors.primary}
         multiline
         value={content}
         onChangeText={setContent}
-        className="mt-4 flex-1 font-reading text-base text-dark"
+        className="mt-4 flex-1 font-reading text-base text-ink"
         textAlignVertical="top"
       />
     </View>
