@@ -103,6 +103,7 @@ export default function NotebooksScreen() {
               return (
                 <CreateCard
                   label="Novo notebook"
+                  subtitle="Criar coleção de poemas"
                   onPress={createNotebook}
                   textPosition={viewMode === 'albums' ? 'below' : 'row'}
                 />

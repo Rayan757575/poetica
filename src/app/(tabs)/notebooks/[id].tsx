@@ -99,7 +99,12 @@ export default function NotebookScreen() {
               contentContainerStyle={{ paddingLeft: sideInset, paddingRight: 24 }}
               renderItem={({ item }) =>
                 item.kind === 'create' ? (
-                  <CreateCard label="Novo poema" onPress={createPoem} textPosition="inside" />
+                  <CreateCard
+                    label="Novo poema"
+                    subtitle="Folha em branco"
+                    onPress={createPoem}
+                    textPosition="inside"
+                  />
                 ) : (
                   <PoemCard poem={item.poem} />
                 )
@@ -113,7 +118,12 @@ export default function NotebookScreen() {
             contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16 }}
             renderItem={({ item }) =>
               item.kind === 'create' ? (
-                <CreateCard label="Novo poema" onPress={createPoem} textPosition="row" />
+                <CreateCard
+                  label="Novo poema"
+                  subtitle="Começar a escrever"
+                  onPress={createPoem}
+                  textPosition="row"
+                />
               ) : (
                 <PoemListItem poem={item.poem} />
               )

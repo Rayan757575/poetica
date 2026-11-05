@@ -6,6 +6,7 @@ import { cardRadius, cardSize, listThumbRadius, listThumbSize } from '@/shared/t
 
 type CreateCardProps = {
   label: string;
+  subtitle?: string;
   onPress: () => void;
   // 'below'/'inside' seguem o NotebookCard (modo "albums"); 'row' espelha
   // NotebookListItem/PoemListItem (miniatura + texto ao lado), usado
@@ -13,20 +14,35 @@ type CreateCardProps = {
   textPosition?: 'below' | 'inside' | 'row';
 };
 
-export function CreateCard({ label, onPress, textPosition = 'below' }: CreateCardProps) {
+const ROW_CAPSULE_SIZE = Math.round(listThumbSize * 0.52);
+const ROW_ICON_SIZE = Math.round(listThumbSize * 0.34);
+const CARD_CAPSULE_SIZE = Math.round(cardSize * 0.32);
+const CARD_ICON_SIZE = Math.round(cardSize * 0.18);
+
+export function CreateCard({ label, subtitle, onPress, textPosition = 'below' }: CreateCardProps) {
   if (textPosition === 'row') {
     return (
       <Pressable onPress={onPress} className="mb-4 flex-row items-center">
         <View
-          className="items-center justify-center border-2 border-dashed border-primary bg-backgroundTabs"
+          className="items-center justify-center border border-primaryTint-mid bg-primaryTint-soft"
           style={{ width: listThumbSize, height: listThumbSize, borderRadius: listThumbRadius }}
         >
-          <Ionicons name="add" size={Math.round(listThumbSize * 0.5)} color={colors.primary} />
+          <View
+            className="items-center justify-center rounded-full bg-primaryTint-mid"
+            style={{ width: ROW_CAPSULE_SIZE, height: ROW_CAPSULE_SIZE }}
+          >
+            <Ionicons name="add" size={ROW_ICON_SIZE} color={colors.primary} />
+          </View>
         </View>
-        <Text className="ml-3 font-regular text-base text-primary">{label}</Text>
+        <View className="ml-3">
+          <Text className="font-regular text-base text-primary">{label}</Text>
+          {subtitle && <Text className="mt-1 text-xs text-muted">{subtitle}</Text>}
+        </View>
       </Pressable>
     );
   }
+
+  const isInside = textPosition === 'inside';
 
   return (
     <Pressable
@@ -36,12 +52,28 @@ export function CreateCard({ label, onPress, textPosition = 'below' }: CreateCar
       }
     >
       <View
-        className="items-center justify-center border-2 border-dashed border-primary bg-backgroundTabs"
+        className="items-center justify-center border border-primaryTint-mid bg-primaryTint-soft px-3"
         style={{ width: cardSize, height: cardSize, borderRadius: cardRadius }}
       >
-        <Ionicons name="add" size={Math.round(cardSize * 0.25)} color={colors.primary} />
-        {textPosition === 'inside' && (
-          <Text className="mt-2 text-center font-medium text-primary">{label}</Text>
+        <View
+          className={`items-center justify-center rounded-full ${
+            isInside ? 'bg-primary' : 'bg-primaryTint-mid'
+          }`}
+          style={{ width: CARD_CAPSULE_SIZE, height: CARD_CAPSULE_SIZE, borderRadius: 999 }}
+        >
+          <Ionicons
+            name="add"
+            size={CARD_ICON_SIZE}
+            color={isInside ? colors.white : colors.primary}
+          />
+        </View>
+        {isInside && (
+          <>
+            <Text className="mt-2.5 text-center font-medium text-xs text-primary">{label}</Text>
+            {subtitle && (
+              <Text className="mt-0.5 text-center font-reading text-xs text-muted">{subtitle}</Text>
+            )}
+          </>
         )}
       </View>
       {textPosition === 'below' && (
