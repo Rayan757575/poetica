@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -33,7 +34,7 @@ export const useNotebooksStore = create<NotebooksState>()(
       notebooks: [uncategorizedNotebook],
       addNotebook: (title, wallpaper) => {
         const notebook: Notebook = {
-          id: Date.now().toString(),
+          id: Crypto.randomUUID(),
           title,
           wallpaper,
           createdAt: new Date().toISOString(),

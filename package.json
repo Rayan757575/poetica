@@ -20,6 +20,7 @@
     "axios": "^1.7.2",
     "expo": "^58.0.23",
     "expo-constants": "~58.0.15",
+    "expo-crypto": "~58.0.7",
     "expo-font": "*",
     "expo-linear-gradient": "*",
     "expo-linking": "~58.0.16",
