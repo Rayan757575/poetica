@@ -6,7 +6,20 @@ import { zustandStorage } from '@/shared/lib/storage';
 import type { Poem } from '../types';
 
 const MAX_RECENT_POEMS = 5;
-const DEFAULT_AUTHOR = 'você'; // fixo por enquanto — métricas futuras, não exibido
+const DEFAULT_AUTHOR = 'você'; // fixo por enquanto — métricas futuras
+
+// Título usado quando o usuário não digita nenhum. No editor ele aparece só
+// como placeholder, então manter o nome padrão continua sendo uma escolha
+// válida (basta não preencher o título).
+export const DEFAULT_POEM_TITLE = 'Novo poema';
+
+// Id reservado da rota do editor para um poema ainda não salvo (rascunho).
+// Ids reais são Date.now(), então não há colisão.
+export const NEW_POEM_ID = 'new';
+
+function titleOrDefault(title: string): string {
+  return title.trim() ? title : DEFAULT_POEM_TITLE;
+}
 
 function bumpRecent(recentIds: string[], poemId: string): string[] {
   const withoutCurrent = recentIds.filter((id) => id !== poemId);
@@ -16,9 +29,10 @@ function bumpRecent(recentIds: string[], poemId: string): string[] {
 type PoemsState = {
   poems: Poem[];
   recentPoemIds: string[];
-  // Sem parâmetro de título: todo poema novo nasce "Novo poema" (ponto
-  // 5) até existir uma forma de nomear já na criação.
-  addPoem: (notebookId: string) => Poem;
+  // Recebe título/conteúdo porque o poema só é criado ao sair do editor,
+  // se algo tiver sido escrito (rascunhos vazios nunca chegam ao storage).
+  // Título vazio vira DEFAULT_POEM_TITLE.
+  addPoem: (notebookId: string, data: Pick<Poem, 'title' | 'content'>) => Poem;
   updatePoem: (id: string, patch: Partial<Pick<Poem, 'title' | 'content'>>) => void;
   removePoem: (id: string) => void;
 };
@@ -28,13 +42,13 @@ export const usePoemsStore = create<PoemsState>()(
     (set) => ({
       poems: [],
       recentPoemIds: [],
-      addPoem: (notebookId) => {
+      addPoem: (notebookId, data) => {
         const now = new Date().toISOString();
         const poem: Poem = {
           id: Date.now().toString(),
           notebookId,
-          title: 'Novo poema',
-          content: '',
+          title: titleOrDefault(data.title),
+          content: data.content,
           type: 'livre', // sem seletor de tipo na criação ainda, livre é o padrão
           createdAt: now,
           createdBy: DEFAULT_AUTHOR,
@@ -54,6 +68,7 @@ export const usePoemsStore = create<PoemsState>()(
               ? {
                   ...poem,
                   ...patch,
+                  ...(patch.title !== undefined && { title: titleOrDefault(patch.title) }),
                   updatedAt: new Date().toISOString(),
                   updatedBy: DEFAULT_AUTHOR,
                 }

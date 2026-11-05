@@ -1,75 +1,90 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TextInput, View } from 'react-native';
 
-import { usePoemsStore } from '@/features/poems/store/usePoemsStore';
+import { UNCATEGORIZED_NOTEBOOK_ID } from '@/features/notebooks/store/useNotebooksStore';
+import { PoemEditorHeader } from '@/features/poems/components/PoemEditorHeader';
+import {
+  DEFAULT_POEM_TITLE,
+  NEW_POEM_ID,
+  usePoemsStore,
+} from '@/features/poems/store/usePoemsStore';
 import { colors } from '@/shared/theme/colors';
-import { moderateScale } from '@/shared/theme/metrics';
 
+// Rota única do editor, em dois modos:
+// - `/poem/<id>`: edita um poema existente.
+// - `/poem/new?notebookId=...`: rascunho. Nada vai pro store enquanto o
+//   usuário digita; ao sair, só vira poema se título OU conteúdo tiver algo.
+//   Assim rascunhos vazios nunca chegam ao storage, sem depender de comparar
+//   o título com o nome padrão (que continua válido como escolha do usuário).
 export default function PoemScreen() {
-  const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const poem = usePoemsStore((state) => state.poems.find((p) => p.id === id));
+  const { id, notebookId } = useLocalSearchParams<{ id: string; notebookId?: string }>();
+  const isDraft = id === NEW_POEM_ID;
+  const poem = usePoemsStore((state) =>
+    isDraft ? undefined : state.poems.find((p) => p.id === id)
+  );
+  const addPoem = usePoemsStore((state) => state.addPoem);
   const updatePoem = usePoemsStore((state) => state.updatePoem);
 
   const [title, setTitle] = useState(poem?.title ?? '');
   const [content, setContent] = useState(poem?.content ?? '');
 
-  // Sempre com o valor mais recente, pra o cleanup do useEffect abaixo
-  // não enxergar um title/content "velho" (closure stale).
+  // Espelho do texto atual pra o cleanup do useEffect abaixo não enxergar
+  // um title/content "velho" (closure stale). Atualizado nos handlers (e
+  // não no render) pra seguir as regras do React Compiler.
   const titleRef = useRef(title);
   const contentRef = useRef(content);
-  titleRef.current = title;
-  contentRef.current = content;
 
-  useEffect(() => {
-    setTitle(poem?.title ?? '');
-    setContent(poem?.content ?? '');
-  }, [poem?.id]);
+  const changeTitle = (text: string) => {
+    titleRef.current = text;
+    setTitle(text);
+  };
+  const changeContent = (text: string) => {
+    contentRef.current = text;
+    setContent(text);
+  };
 
-  // Salva ao desmontar a tela — cobre a seta de voltar, o botão físico
-  // de voltar do Android e o gesto de arrastar, já que todos eles
-  // desmontam esse componente (antes só a seta disparava o save).
+  // Salva UMA vez, ao desmontar a tela — cobre a seta de voltar, o botão
+  // físico do Android e o gesto de arrastar. Escalável: zero escrita no
+  // storage por tecla digitada; só a versão final da sessão de edição.
   useEffect(() => {
     return () => {
-      if (id) {
-        updatePoem(id, { title: titleRef.current, content: contentRef.current });
+      const data = { title: titleRef.current, content: contentRef.current };
+      if (isDraft) {
+        const isEmpty = !data.title.trim() && !data.content.trim();
+        if (!isEmpty) addPoem(notebookId ?? UNCATEGORIZED_NOTEBOOK_ID, data);
+        return;
       }
+      if (id) updatePoem(id, data);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, isDraft, notebookId, addPoem, updatePoem]);
 
   // TODO: ao selecionar uma palavra, abrir menu com busca de sinônimos
   // (feature central do produto). Candidato: @10play/tentap-editor.
   return (
-    <View
-      className="flex-1 bg-backgroundReading px-6"
-      style={{ paddingTop: insets.top + moderateScale(12) }}
-    >
-      <Pressable onPress={() => router.back()} className="mb-6" hitSlop={12}>
-        <Ionicons name="arrow-back" size={24} color={colors.ink} />
-      </Pressable>
-      <TextInput
-        placeholder="Title"
-        placeholderTextColor={colors.muted}
-        selectionColor={colors.primary}
-        multiline
-        value={title}
-        onChangeText={setTitle}
-        className="font-medium text-2xl text-ink"
-      />
-      <TextInput
-        placeholder="Write here"
-        placeholderTextColor={colors.muted}
-        selectionColor={colors.primary}
-        multiline
-        value={content}
-        onChangeText={setContent}
-        className="mt-4 flex-1 font-reading text-base text-ink"
-        textAlignVertical="top"
-      />
+    <View className="flex-1 bg-backgroundReading">
+      <PoemEditorHeader onBack={() => router.back()} />
+      <View className="flex-1 px-6 pt-4">
+        <TextInput
+          placeholder={DEFAULT_POEM_TITLE}
+          placeholderTextColor={colors.muted}
+          selectionColor={colors.primary}
+          multiline
+          value={title}
+          onChangeText={changeTitle}
+          className="font-medium text-2xl text-ink"
+        />
+        <TextInput
+          placeholder="Escreva aqui"
+          placeholderTextColor={colors.muted}
+          selectionColor={colors.primary}
+          multiline
+          value={content}
+          onChangeText={changeContent}
+          className="mt-4 flex-1 font-reading text-base text-ink"
+          textAlignVertical="top"
+        />
+      </View>
     </View>
   );
 }
