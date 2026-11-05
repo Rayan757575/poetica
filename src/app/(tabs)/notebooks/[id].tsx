@@ -8,6 +8,7 @@ import { PoemListItem } from '@/features/poems/components/PoemListItem';
 import { NEW_POEM_ID, usePoemsStore } from '@/features/poems/store/usePoemsStore';
 import type { Poem } from '@/features/poems/types';
 import { CreateCard } from '@/shared/components/CreateCard';
+import { CreatedItemTransition } from '@/shared/components/CreatedItemTransition';
 import { ProcessingFlash } from '@/shared/components/ProcessingFlash';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
 import { SortFilterBar } from '@/shared/components/SortFilterBar';
@@ -29,11 +30,16 @@ export default function NotebookScreen() {
   const selectSortKey = (key: string) => {
     setSortSheetVisible(false);
     if (key === sortKey) return;
-    setSortKey(key);
     setSortFlashTrigger((count) => count + 1);
+    // Aplica a nova ordenação exatamente no vale de 75ms da Fase 1 do ProcessingFlash,
+    // quando a lista está em opacity 0.25 e scale 0.975, emergindo já reordenada na Fase 2.
+    setTimeout(() => {
+      setSortKey(key);
+    }, 75);
   };
 
   const allPoems = usePoemsStore((state) => state.poems);
+  const lastCreatedPoemId = usePoemsStore((state) => state.lastCreatedPoemId);
   // Filtra o notebook e ordena conforme a chave do SortOptionsSheet.
   // `filter` já devolve um array novo, então `sort` não muta o store.
   const poems = useMemo(() => {
@@ -85,6 +91,7 @@ export default function NotebookScreen() {
         viewMode={viewMode}
         onToggleViewMode={toggleViewMode}
         onSortPress={() => setSortSheetVisible(true)}
+        processingTrigger={sortFlashTrigger}
       />
 
       <ProcessingFlash trigger={sortFlashTrigger}>
@@ -106,7 +113,9 @@ export default function NotebookScreen() {
                     textPosition="inside"
                   />
                 ) : (
-                  <PoemCard poem={item.poem} />
+                  <CreatedItemTransition isNew={item.poem.id === lastCreatedPoemId}>
+                    <PoemCard poem={item.poem} />
+                  </CreatedItemTransition>
                 )
               }
             />
@@ -125,7 +134,9 @@ export default function NotebookScreen() {
                   textPosition="row"
                 />
               ) : (
-                <PoemListItem poem={item.poem} />
+                <CreatedItemTransition isNew={item.poem.id === lastCreatedPoemId}>
+                  <PoemListItem poem={item.poem} />
+                </CreatedItemTransition>
               )
             }
           />

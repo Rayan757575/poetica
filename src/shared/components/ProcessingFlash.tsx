@@ -5,21 +5,17 @@ import { colors } from '@/shared/theme/colors';
 
 type ProcessingFlashProps = {
   /**
-   * Incrementar esse número dispara a transição de reordenação. Usamos um
-   * contador controlado pela tela, e não o valor da ordenação em si, para
-   * só animar em ação explícita do usuário — nunca na hidratação do storage.
+   * Incrementar esse número dispara a transição de reordenação (Modelo R3:
+   * Scale-Settle em 2 fases, 75ms recolhimento + 130ms acomodação = 205ms).
+   * Usamos um contador controlado pela tela para só animar em ação explícita
+   * do usuário — nunca na hidratação do storage.
    */
   trigger: number;
   children: ReactNode;
 };
 
-const SLIDE_OFFSET = 10;
+const MAX_VEIL_OPACITY = 0.35;
 
-// Combina o escurecimento rápido estilo Spotify (`colors.backdrop`, matriz
-// quente do `ink`) com um micro-slide + fade da própria lista ao emergir
-// reordenada. Usa apenas `opacity` e `transform` com `useNativeDriver: true`,
-// rodando 100% na UI thread com custo fixo O(1), sem recalcular layout de
-// cada item da FlatList.
 export function ProcessingFlash({ trigger, children }: ProcessingFlashProps) {
   const veilOpacity = useAnimatedValue(0);
   const contentProgress = useAnimatedValue(1);
@@ -32,28 +28,28 @@ export function ProcessingFlash({ trigger, children }: ProcessingFlashProps) {
     Animated.parallel([
       Animated.sequence([
         Animated.timing(veilOpacity, {
-          toValue: 1,
-          duration: 90,
+          toValue: MAX_VEIL_OPACITY,
+          duration: 75,
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(veilOpacity, {
           toValue: 0,
-          duration: 190,
-          easing: Easing.inOut(Easing.cubic),
+          duration: 130,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]),
       Animated.sequence([
         Animated.timing(contentProgress, {
           toValue: 0,
-          duration: 80,
+          duration: 75,
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(contentProgress, {
           toValue: 1,
-          duration: 200,
+          duration: 130,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
@@ -68,13 +64,13 @@ export function ProcessingFlash({ trigger, children }: ProcessingFlashProps) {
         style={{
           opacity: contentProgress.interpolate({
             inputRange: [0, 1],
-            outputRange: [0.3, 1],
+            outputRange: [0.25, 1],
           }),
           transform: [
             {
-              translateY: contentProgress.interpolate({
+              scale: contentProgress.interpolate({
                 inputRange: [0, 1],
-                outputRange: [SLIDE_OFFSET, 0],
+                outputRange: [0.975, 1],
               }),
             },
           ],
