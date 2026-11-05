@@ -20,6 +20,13 @@ export const colors = {
   // Ícones/textos secundários discretos (cinza quente, combina com os fundos sépia)
   muted: '#6B665F',
 
+  // Tons claros derivados do `primary` — fundos suaves que conversam com
+  // o azul da marca (ex.: degradê da Welcome) sem competir com os botões.
+  primaryTint: {
+    soft: '#EEF4FF',
+    mid: '#D9E7FE',
+  },
+
   // Paleta curada pra cor de capa do notebook (escolha do usuário)
   notebookAccents: {
     terracotta: '#7A4A32',
