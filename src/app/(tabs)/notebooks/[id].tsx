@@ -65,9 +65,22 @@ export default function NotebookScreen() {
 
   const sideInset = Math.max((screenWidth - cardSize) / 2, 24);
 
+  const goBackToNotebooks = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/notebooks');
+    }
+  };
+
   return (
     <View className="flex-1 bg-backgroundReading">
-      <ScreenHeader title={notebook?.title ?? 'Notebook'} showBorder={false} />
+      <ScreenHeader
+        title={notebook?.title ?? 'Notebook'}
+        onBack={goBackToNotebooks}
+        centerTitle
+        showBorder={false}
+      />
       <SortFilterBar
         viewMode={viewMode}
         onToggleViewMode={toggleViewMode}

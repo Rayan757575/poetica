@@ -32,6 +32,7 @@ export default function PoemScreen() {
   // Espelho do texto atual pra o cleanup do useEffect abaixo não enxergar
   // um title/content "velho" (closure stale). Atualizado nos handlers (e
   // não no render) pra seguir as regras do React Compiler.
+  const initialRef = useRef({ title, content });
   const titleRef = useRef(title);
   const contentRef = useRef(content);
 
@@ -46,8 +47,10 @@ export default function PoemScreen() {
 
   // Salva UMA vez, ao desmontar a tela — cobre a seta de voltar, o botão
   // físico do Android e o gesto de arrastar. Escalável: zero escrita no
-  // storage por tecla digitada; só a versão final da sessão de edição.
+  // storage por tecla digitada; só a versão final da sessão de edição, e
+  // apenas se o texto realmente mudou (evita bump de `updatedAt` só por abrir).
   useEffect(() => {
+    const initial = initialRef.current;
     return () => {
       const data = { title: titleRef.current, content: contentRef.current };
       if (isDraft) {
@@ -55,7 +58,8 @@ export default function PoemScreen() {
         if (!isEmpty) addPoem(notebookId ?? UNCATEGORIZED_NOTEBOOK_ID, data);
         return;
       }
-      if (id) updatePoem(id, data);
+      const hasChanged = data.title !== initial.title || data.content !== initial.content;
+      if (id && hasChanged) updatePoem(id, data);
     };
   }, [id, isDraft, notebookId, addPoem, updatePoem]);
 
@@ -67,8 +71,9 @@ export default function PoemScreen() {
       <View className="flex-1 px-6 pt-4">
         <TextInput
           placeholder={DEFAULT_POEM_TITLE}
-          placeholderTextColor={colors.muted}
-          selectionColor={colors.primary}
+          placeholderTextColor={colors.placeholder}
+          cursorColor={colors.cursor}
+          selectionColor={colors.selection}
           multiline
           value={title}
           onChangeText={changeTitle}
@@ -76,12 +81,14 @@ export default function PoemScreen() {
         />
         <TextInput
           placeholder="Escreva aqui"
-          placeholderTextColor={colors.muted}
-          selectionColor={colors.primary}
+          placeholderTextColor={colors.placeholder}
+          cursorColor={colors.cursor}
+          selectionColor={colors.selection}
           multiline
           value={content}
           onChangeText={changeContent}
-          className="mt-4 flex-1 font-reading text-base text-ink"
+          style={{ lineHeight: 28 }}
+          className="mt-4 flex-1 font-reading text-base leading-relaxed text-ink"
           textAlignVertical="top"
         />
       </View>

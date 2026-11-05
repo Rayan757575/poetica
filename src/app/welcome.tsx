@@ -136,7 +136,7 @@ export default function WelcomeScreen() {
         <View className="items-center">
           <Pressable
             onPress={continueToApp}
-            className="w-full max-w-xs flex-row items-center justify-center rounded-full bg-primary py-4"
+            className="w-full max-w-xs flex-row items-center justify-center rounded-full bg-primary py-4 active:bg-primaryPressed"
             style={{
               shadowColor: colors.primary,
               shadowOffset: { width: 0, height: 4 },

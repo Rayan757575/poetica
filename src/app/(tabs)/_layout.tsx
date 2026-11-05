@@ -11,7 +11,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.white, borderTopColor: 'rgba(22,22,22,0.08)' },
+        tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.border },
         tabBarLabelStyle: { fontFamily: fontFamily.uiMedium, fontSize: fontSize.caption },
       }}
     >

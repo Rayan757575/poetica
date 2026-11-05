@@ -10,7 +10,7 @@ export function PoemCard({ poem }: { poem: Poem }) {
   return (
     <Link href={`/poem/${poem.id}`} asChild>
       <Pressable
-        className="mr-6 items-start justify-start overflow-hidden bg-primary p-5"
+        className="mr-6 items-start justify-start overflow-hidden bg-primary p-5 active:bg-primaryPressed"
         style={{ width: cardSize, height: cardSize, borderRadius: cardRadius }}
       >
         <Text className="mb-2 font-medium text-white" numberOfLines={1}>

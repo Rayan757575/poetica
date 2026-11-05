@@ -78,17 +78,17 @@ export function SortOptionsSheet({
             left: 0,
             right: 0,
             bottom: 0,
+            backgroundColor: colors.backdrop,
             opacity: backdropOpacity,
           }}
-          className="bg-black/40"
         >
           <Pressable style={{ flex: 1 }} onPress={onClose} />
         </Animated.View>
         <Animated.View
           style={{ transform: [{ translateY: sheetTranslateY }] }}
-          className="rounded-t-3xl bg-white px-6 pb-10 pt-4"
+          className="rounded-t-3xl bg-surfaceElevated px-6 pb-10 pt-4"
         >
-          <View className="mb-4 h-1 w-10 self-center rounded-full bg-dark/20" />
+          <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />
           <Text className="mb-2 font-medium text-lg text-dark">Ordenar por</Text>
           {options.map((option) => (
             <Pressable

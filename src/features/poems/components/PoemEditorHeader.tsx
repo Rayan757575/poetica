@@ -33,7 +33,7 @@ export function PoemEditorHeader({
       style={{
         paddingTop: insets.top + moderateScale(8),
         borderBottomWidth: showBorder ? 1 : 0,
-        borderBottomColor: 'rgba(22,22,22,0.08)',
+        borderBottomColor: colors.border,
       }}
       className="flex-row items-center justify-between bg-backgroundReading px-6 pb-3"
     >
