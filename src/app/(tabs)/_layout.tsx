@@ -24,6 +24,9 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* `notebooks` é uma pasta com Stack próprio (notebooks/_layout.tsx):
+          lista + detalhe do notebook vivem dentro desta aba, com a navbar
+          visível e transição nativa de push entre eles. */}
       <Tabs.Screen
         name="notebooks"
         options={{
@@ -32,13 +35,6 @@ export default function TabsLayout() {
             <Ionicons name="library-outline" color={color as string} size={size} />
           ),
         }}
-      />
-      {/* Faz parte do navegador de tabs (pra manter o navbar visível),
-          mas tabBarButton nulo tira esse item da própria tab bar — ele só é
-          alcançado a partir do card de um notebook. */}
-      <Tabs.Screen
-        name="notebook/[id]"
-        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
       />
     </Tabs>
   );

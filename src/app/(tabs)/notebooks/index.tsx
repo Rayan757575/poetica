@@ -4,12 +4,17 @@ import { FlatList, Pressable, View } from 'react-native';
 
 import { NotebookCard } from '@/features/notebooks/components/NotebookCard';
 import { NotebookListItem } from '@/features/notebooks/components/NotebookListItem';
-import { useNotebooksStore } from '@/features/notebooks/store/useNotebooksStore';
+import {
+  UNCATEGORIZED_NOTEBOOK_ID,
+  useNotebooksStore,
+} from '@/features/notebooks/store/useNotebooksStore';
 import type { Notebook } from '@/features/notebooks/types';
 import { CreateCard } from '@/shared/components/CreateCard';
+import { ProcessingFlash } from '@/shared/components/ProcessingFlash';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
-import { SortFilterBar, type ListViewMode } from '@/shared/components/SortFilterBar';
+import { SortFilterBar } from '@/shared/components/SortFilterBar';
 import { SortOptionsSheet } from '@/shared/components/SortOptionsSheet';
+import { useScreenPreference } from '@/shared/store/useScreenPreferencesStore';
 import { colors } from '@/shared/theme/colors';
 
 type GridItem = { kind: 'create' } | { kind: 'notebook'; notebook: Notebook };
@@ -17,12 +22,26 @@ type GridItem = { kind: 'create' } | { kind: 'notebook'; notebook: Notebook };
 export default function NotebooksScreen() {
   const notebooks = useNotebooksStore((state) => state.notebooks);
   const addNotebook = useNotebooksStore((state) => state.addNotebook);
-  const [viewMode, setViewMode] = useState<ListViewMode>('list');
+  const { viewMode, sortKey, toggleViewMode, setSortKey } = useScreenPreference('notebooks');
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
-  const [sortKey, setSortKey] = useState('recent');
+  const [sortFlashTrigger, setSortFlashTrigger] = useState(0);
 
+  // Fecha o sheet ao escolher (padrão de apps como o Spotify) e dispara o
+  // flash só quando a ordenação realmente muda.
+  const selectSortKey = (key: string) => {
+    setSortSheetVisible(false);
+    if (key === sortKey) return;
+    setSortKey(key);
+    setSortFlashTrigger((count) => count + 1);
+  };
+
+  // "Sem categoria" é fixo e não entra na contagem, então o primeiro
+  // notebook criado pelo usuário é "My poems 1".
   const createNotebook = () => {
-    addNotebook(`My poems ${notebooks.length + 1}`);
+    const userNotebooksCount = notebooks.filter(
+      (notebook) => notebook.id !== UNCATEGORIZED_NOTEBOOK_ID
+    ).length;
+    addNotebook(`My poems ${userNotebooksCount + 1}`);
   };
 
   // Ordenação por chave do SortOptionsSheet. `slice()` evita mutar o array
@@ -66,38 +85,42 @@ export default function NotebooksScreen() {
       />
       <SortFilterBar
         viewMode={viewMode}
-        onToggleViewMode={() => setViewMode((mode) => (mode === 'list' ? 'albums' : 'list'))}
+        onToggleViewMode={toggleViewMode}
         onSortPress={() => setSortSheetVisible(true)}
       />
-      <FlatList
-        key={viewMode}
-        data={gridData}
-        keyExtractor={(item) => (item.kind === 'create' ? 'create' : item.notebook.id)}
-        numColumns={viewMode === 'albums' ? 2 : 1}
-        columnWrapperStyle={viewMode === 'albums' ? { justifyContent: 'space-between' } : undefined}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16 }}
-        renderItem={({ item }) => {
-          if (item.kind === 'create') {
-            return (
-              <CreateCard
-                label="Novo notebook"
-                onPress={createNotebook}
-                textPosition={viewMode === 'albums' ? 'below' : 'row'}
-              />
-            );
+      <ProcessingFlash trigger={sortFlashTrigger}>
+        <FlatList
+          key={viewMode}
+          data={gridData}
+          keyExtractor={(item) => (item.kind === 'create' ? 'create' : item.notebook.id)}
+          numColumns={viewMode === 'albums' ? 2 : 1}
+          columnWrapperStyle={
+            viewMode === 'albums' ? { justifyContent: 'space-between' } : undefined
           }
-          return viewMode === 'albums' ? (
-            <NotebookCard notebook={item.notebook} />
-          ) : (
-            <NotebookListItem notebook={item.notebook} />
-          );
-        }}
-      />
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16 }}
+          renderItem={({ item }) => {
+            if (item.kind === 'create') {
+              return (
+                <CreateCard
+                  label="Novo notebook"
+                  onPress={createNotebook}
+                  textPosition={viewMode === 'albums' ? 'below' : 'row'}
+                />
+              );
+            }
+            return viewMode === 'albums' ? (
+              <NotebookCard notebook={item.notebook} />
+            ) : (
+              <NotebookListItem notebook={item.notebook} />
+            );
+          }}
+        />
+      </ProcessingFlash>
       <SortOptionsSheet
         visible={sortSheetVisible}
         onClose={() => setSortSheetVisible(false)}
         selectedKey={sortKey}
-        onSelect={setSortKey}
+        onSelect={selectSortKey}
         options={[
           { key: 'recent', label: 'Criado recentemente' },
           { key: 'alphabetical', label: 'Alfabética' },
