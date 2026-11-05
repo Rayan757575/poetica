@@ -8,7 +8,7 @@ import {
 import { usePoemsStore } from '@/features/poems/store/usePoemsStore';
 import { CreateCard } from '@/shared/components/CreateCard';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
-import { colors } from '@/shared/theme/colors';
+import { subtleDividerStyle } from '@/shared/theme/elevation';
 
 export default function HomeScreen() {
   const notebooksCount = useNotebooksStore((state) => state.notebooks.length);
@@ -22,10 +22,7 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-backgroundTabs">
       <ScreenHeader title="Home" />
-      <View
-        style={{ borderBottomWidth: 1, borderBottomColor: colors.light }}
-        className="px-6 pb-4"
-      >
+      <View style={subtleDividerStyle} className="px-6 pb-4">
         <Text className="mt-6 text-dark/60">
           {notebooksCount} notebook(s) — veja todos na aba Notebooks.
         </Text>

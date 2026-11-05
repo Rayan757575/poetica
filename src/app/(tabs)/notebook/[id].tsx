@@ -84,7 +84,7 @@ export default function NotebookScreen() {
           contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16 }}
           renderItem={({ item }) =>
             item.kind === 'create' ? (
-              <CreateCard label="Novo poema" onPress={createPoem} />
+              <CreateCard label="Novo poema" onPress={createPoem} textPosition="row" />
             ) : (
               <PoemListItem poem={item.poem} />
             )

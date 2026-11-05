@@ -57,13 +57,17 @@ export default function NotebooksScreen() {
         data={gridData}
         keyExtractor={(item) => (item.kind === 'create' ? 'create' : item.notebook.id)}
         numColumns={viewMode === 'albums' ? 2 : 1}
-        columnWrapperStyle={
-          viewMode === 'albums' ? { justifyContent: 'space-between' } : undefined
-        }
+        columnWrapperStyle={viewMode === 'albums' ? { justifyContent: 'space-between' } : undefined}
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16 }}
         renderItem={({ item }) => {
           if (item.kind === 'create') {
-            return <CreateCard label="Novo notebook" onPress={createNotebook} />;
+            return (
+              <CreateCard
+                label="Novo notebook"
+                onPress={createNotebook}
+                textPosition={viewMode === 'albums' ? 'below' : 'row'}
+              />
+            );
           }
           return viewMode === 'albums' ? (
             <NotebookCard notebook={item.notebook} />

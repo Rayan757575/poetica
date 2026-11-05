@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+﻿import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 
 import { colors } from '@/shared/theme/colors';
@@ -18,7 +18,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
+            <Ionicons name="home-outline" color={color as string} size={size} />
           ),
         }}
       />
@@ -27,14 +27,17 @@ export default function TabsLayout() {
         options={{
           title: 'Notebooks',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="library-outline" color={color} size={size} />
+            <Ionicons name="library-outline" color={color as string} size={size} />
           ),
         }}
       />
       {/* Faz parte do navegador de tabs (pra manter o navbar visível),
-          mas href: null tira esse item da própria tab bar — ele só é
+          mas tabBarButton nulo tira esse item da própria tab bar — ele só é
           alcançado a partir do card de um notebook. */}
-      <Tabs.Screen name="notebook/[id]" options={{ href: null }} />
+      <Tabs.Screen
+        name="notebook/[id]"
+        options={{ tabBarButton: () => null, tabBarItemStyle: { display: 'none' } }}
+      />
     </Tabs>
   );
 }
