@@ -1,6 +1,6 @@
 # Poética
 
-App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos são organizados em **notebooks**, na mesma lógica das playlists do Spotify: cada notebook agrupa poemas por assunto, gênero ou heterônimo.
+App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos são organizados em **notebooks**, na mesma lógica de playlists: cada notebook agrupa poemas por assunto, gênero ou heterônimo.
 
 > Este repositório é a **v2**, reescrita do zero sobre o mesmo repositório do projeto original (histórico antigo sobrescrito via `git push --force`). Também é uma peça de portfólio profissional.
 
