@@ -2,10 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
-import { scale } from '@/shared/theme/metrics';
+import { colors } from '@/shared/theme/colors';
+import { listThumbRadius, listThumbSize } from '@/shared/theme/metrics';
 import type { Poem } from '../types';
-
-const THUMB_SIZE = scale(56);
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -16,10 +15,10 @@ export function PoemListItem({ poem }: { poem: Poem }) {
     <Link href={`/poem/${poem.id}`} asChild>
       <Pressable className="mb-4 flex-row items-center">
         <View
-          className="items-center justify-center rounded-lg bg-primary"
-          style={{ width: THUMB_SIZE, height: THUMB_SIZE }}
+          className="items-center justify-center bg-primary"
+          style={{ width: listThumbSize, height: listThumbSize, borderRadius: listThumbRadius }}
         >
-          <Ionicons name="document-text-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="document-text-outline" size={24} color={colors.white} />
         </View>
         <View className="ml-3">
           <Text className="font-regular text-base text-primary">{poem.title}</Text>
