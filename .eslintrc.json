@@ -1,5 +1,0 @@
-{
-  "extends": "expo",
-  "root": true,
-  "ignorePatterns": ["/dist/*"]
-}

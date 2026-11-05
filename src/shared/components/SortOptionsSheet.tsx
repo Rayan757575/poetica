@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Modal, Pressable, Text, View, useAnimatedValue } from 'react-native';
 
 import { colors } from '@/shared/theme/colors';
 
@@ -29,12 +29,15 @@ export function SortOptionsSheet({
   onSelect,
 }: SortOptionsSheetProps) {
   const [modalVisible, setModalVisible] = useState(visible);
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const sheetTranslateY = useRef(new Animated.Value(SHEET_OFFSET)).current;
+  const backdropOpacity = useAnimatedValue(0);
+  const sheetTranslateY = useAnimatedValue(SHEET_OFFSET);
+
+  if (visible && !modalVisible) {
+    setModalVisible(true);
+  }
 
   useEffect(() => {
     if (visible) {
-      setModalVisible(true);
       Animated.parallel([
         Animated.timing(backdropOpacity, {
           toValue: 1,
@@ -59,7 +62,9 @@ export function SortOptionsSheet({
           duration: 200,
           useNativeDriver: true,
         }),
-      ]).start(() => setModalVisible(false));
+      ]).start(({ finished }) => {
+        if (finished) setModalVisible(false);
+      });
     }
   }, [visible, backdropOpacity, sheetTranslateY]);
 
