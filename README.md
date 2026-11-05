@@ -19,15 +19,15 @@ App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos sã
 
 ## Stack
 
-| Área | Tecnologia |
-|------|------------|
-| Base | Expo SDK 57, React Native 0.86.3, React 19.2.3, TypeScript (`strict`) |
-| Navegação | Expo Router (file-based) |
-| Estado | Zustand + `persist` com `@react-native-async-storage/async-storage` |
-| Estilo | NativeWind v4 (Tailwind) |
-| Ícones | `@expo/vector-icons/Ionicons` |
-| Responsividade | `react-native-size-matters` |
-| Fontes | Lemonada (marca/títulos), Literata (corpo do editor), Inter (labels de UI) |
+| Área           | Tecnologia                                                                 |
+| -------------- | -------------------------------------------------------------------------- |
+| Base           | Expo SDK 57, React Native 0.86.3, React 19.2.3, TypeScript (`strict`)      |
+| Navegação      | Expo Router (file-based)                                                   |
+| Estado         | Zustand + `persist` com `@react-native-async-storage/async-storage`        |
+| Estilo         | NativeWind v4 (Tailwind)                                                   |
+| Ícones         | `@expo/vector-icons/Ionicons`                                              |
+| Responsividade | `react-native-size-matters`                                                |
+| Fontes         | Lemonada (marca/títulos), Literata (corpo do editor), Inter (labels de UI) |
 
 O app é testado principalmente via **Expo Go**, o que restringe o uso de libs nativas.
 
@@ -76,26 +76,35 @@ assets/images/              # logo, wallpapers, ícones
 
 Os tokens em `src/shared/theme/` são a fonte única de verdade: `colors.ts` e `typography.ts` são importados diretamente pelo `tailwind.config.js`, sem duplicação.
 
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `primary` | `#0a63f4` | Cor central do app (decisão inegociável) |
-| `white` | `#FFFFFF` | |
-| `light` | `#F8F8FF` | |
-| `secondary` | `#D5DEEF` | Placeholder de capa de notebook |
-| `dark` | `#161616` | Texto padrão |
-| `backgroundTabs` | `#F7F5F1` | Fundo de Home/Notebooks |
-| `backgroundReading` | `#FBF6EE` | Fundo do notebook-detail e do editor (sépia) |
-| `ink` | `#2B2320` | Texto do corpo do editor |
-| `surfaceBar` | `#FCFBF8` | Faixa entre o header e o conteúdo (`SortFilterBar`, resumo da Home) |
-| `muted` | `#6B665F` | Ícones e textos secundários discretos |
-| `primaryTint` | `soft` (`#EEF4FF`), `mid` (`#D9E7FE`) | Tons claros derivados do `primary` (degradê dinâmico da Welcome) |
-| `notebookAccents` | terracotta, sage, mustard, dustyBlue | Cores de capa (ainda sem UI) |
+| Token               | Valor                                 | Uso                                                                  |
+| ------------------- | ------------------------------------- | -------------------------------------------------------------------- |
+| `primary`           | `#0a63f4`                             | Cor central do app (decisão inegociável)                             |
+| `primaryPressed`    | `#084EC2`                             | Feedback tátil de pressão em ações primárias                         |
+| `cursor`            | `#3B7BE3`                             | Cursor de digitação no fundo sépia (contraste sem vibração elétrica) |
+| `selection`         | `#C8DCF8`                             | Seleção de texto aquarelada sobre o papel quente                     |
+| `white`             | `#FFFFFF`                             |                                                                      |
+| `light`             | `#F8F8FF`                             |                                                                      |
+| `secondary`         | `#D5DEEF`                             | Placeholder de capa de notebook                                      |
+| `dark`              | `#161616`                             | Texto padrão                                                         |
+| `backgroundTabs`    | `#F7F5F1`                             | Fundo de Home/Notebooks                                              |
+| `backgroundReading` | `#FBF6EE`                             | Fundo do notebook-detail e do editor (sépia)                         |
+| `ink`               | `#2B2320`                             | Texto do corpo do editor                                             |
+| `surfaceBar`        | `#FCFBF8`                             | Faixa entre o header e o conteúdo (`SortFilterBar`, resumo da Home)  |
+| `surfaceElevated`   | `#FFFDF9`                             | Superfície aquecida para modais e bottom sheets (`SortOptionsSheet`) |
+| `backdrop`          | `rgba(27, 22, 20, 0.45)`              | Escurecimento quente de modais e feedback de reordenação             |
+| `muted`             | `#6B665F`                             | Ícones e textos secundários discretos                                |
+| `placeholder`       | `#A39C93`                             | Placeholder silencioso do editor em grafite quente                   |
+| `border`            | `#E6E1D8`                             | Divisórias quentes com aspecto de papelaria                          |
+| `danger`            | `#C84B31`                             | Ação destrutiva (carmim/terracota queimado)                          |
+| `primaryTint`       | `soft` (`#EEF4FF`), `mid` (`#D9E7FE`) | Tons claros derivados do `primary` (degradê dinâmico da Welcome)     |
+| `notebookAccents`   | terracotta, sage, mustard, dustyBlue  | Cores de capa (ainda sem UI)                                         |
 
-Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos quentes reduzem a fadiga ocular em leitura longa; Lemonada (arredondada) fica na marca e nos títulos, e Literata no corpo por ser desenhada para leitura em tela.
+Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, _Science_); fundos quentes reduzem a fadiga ocular em leitura longa; Lemonada (arredondada) fica na marca e nos títulos, e Literata no corpo por ser desenhada para leitura em tela.
 
 ## Regras de negócio
 
 ### Notebooks
+
 - Existe o notebook fixo **"Sem categoria"** (`UNCATEGORIZED_NOTEBOOK_ID = 'uncategorized'`). Ele não pode ser removido, é seedado como primeiro item e reinjetado via `merge` do `persist` se faltar.
 - O contador de criação de novos notebooks ignora "Sem categoria", começando em **"My poems 1"**.
 - `createdBy`/`updatedBy`: `"você"` para o que o usuário cria e `"sistema"` para "Sem categoria". `createdBy` é exibido nas listas (`NotebookListItem` e `PoemListItem`).
@@ -103,13 +112,16 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 - A migração retroativa de `createdBy` (`migrateNotebooks`) foi removida a pedido do dono. Não reintroduzir sem pedir.
 
 ### Poemas
+
 - Campos de `Poem`: `id, notebookId, title, content, type, createdAt, createdBy, updatedAt, updatedBy`.
 - `PoemType = 'soneto' | 'haicai' | 'trova' | 'livre'`, com `'livre'` como padrão. Cada tipo tem um arquivo de metadados em `features/poems/types/` contendo só `{ id }`. Propriedades específicas ainda não foram definidas.
 - Criação em modo **rascunho** (`/poem/new?notebookId=...`): nada é salvo no store ao abrir o editor. O título padrão **"Novo poema"** fica como `placeholder`; ao sair do editor, o poema só é criado se título ou conteúdo tiverem algo escrito (se o título ficar em branco, recebe `"Novo poema"`).
-- O editor salva uma única vez no **unmount** (cleanup de `useEffect`, lendo refs atualizados nos handlers), cobrindo seta, botão físico e gesto de voltar sem custo por tecla digitada.
+- O editor salva uma única vez no **unmount** (cleanup de `useEffect`, lendo refs atualizados nos handlers), cobrindo seta, botão físico e gesto de voltar sem custo por tecla digitada. Se título e conteúdo não mudaram em relação ao valor salvo, `updatePoem` não é disparado (evitando alterar `updatedAt` só por abrir o poema).
+- IDs de notebooks e poemas são gerados com `Crypto.randomUUID()` (`expo-crypto`).
 - `recentPoemIds` (últimos 5 poemas) é um array simples e não um LRU: com N=5 a diferença é irrelevante e serializa direto em JSON.
 
 ### Navegação e visual
+
 - `ScreenHeader` tem fundo branco próprio e usa `useSafeAreaInsets()`.
 - `ScreenHeader` (sem borda nas telas com faixa) e `SortFilterBar`/bloco de resumo da Home formam um só bloco: a faixa usa `surfaceBar` e `subtleDividerStyle` (borda só embaixo + sombra leve) para parecer sobreposta ao conteúdo.
 - A splash é só a nativa (plugin `expo-splash-screen`, imagem `assets/images/splash.png` com logo + "Poética"). No Expo Go ela não aparece, pois o Expo Go mostra a própria tela de carregamento; é preciso um dev client ou build para vê-la. No Android 12+ o sistema aplica máscara circular ao ícone, então a arte tem margem de segurança.
@@ -128,6 +140,7 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 ## Estado atual
 
 **Funciona**
+
 - Fluxo Splash → Welcome → Tabs (Home/Notebooks) → Notebook (transição nativa em Stack aninhado) → Editor.
 - Criação e listagem de notebooks e poemas (com rascunho que evita poemas vazios), edição de título e conteúdo.
 - Notebook "Sem categoria" protegido.
@@ -136,6 +149,7 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 - Componentes compartilhados (`ScreenHeader`, `PoemEditorHeader`, `SortFilterBar`, `SortOptionsSheet`, `CreateCard`, `ProcessingFlash`) e tokens centralizados.
 
 **Pendente ou incerto**
+
 - Ícones de busca e "+" em `ScreenHeader` de Notebooks, e ícones de download e menu em `PoemEditorHeader`, estão inertes.
 - Sem autenticação real.
 - Sem UI para capa de notebook (`wallpaper` cai sempre em `vangogh-2.jpg`) nem para `notebookAccents`.
