@@ -1,5 +1,6 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { FlatList, Text, View, useWindowDimensions } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 
 import {
   UNCATEGORIZED_NOTEBOOK_ID,
@@ -7,18 +8,14 @@ import {
 } from '@/features/notebooks/store/useNotebooksStore';
 import { PoemCard } from '@/features/poems/components/PoemCard';
 import { NEW_POEM_ID, useRecentPoems } from '@/features/poems/store/usePoemsStore';
-import type { Poem } from '@/features/poems/types';
-import { CreateCard } from '@/shared/components/CreateCard';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
+import { colors } from '@/shared/theme/colors';
 import { subtleDividerStyle } from '@/shared/theme/elevation';
 import { cardSize } from '@/shared/theme/metrics';
-
-type RowItem = { kind: 'create' } | { kind: 'poem'; poem: Poem };
 
 export default function HomeScreen() {
   const notebooksCount = useNotebooksStore((state) => state.notebooks.length);
   const recentPoems = useRecentPoems();
-  const { width: screenWidth } = useWindowDimensions();
 
   const createQuickPoem = () => {
     // Rascunho: só vira poema salvo (em "Sem categoria") se algo for escrito.
@@ -27,15 +24,6 @@ export default function HomeScreen() {
       params: { id: NEW_POEM_ID, notebookId: UNCATEGORIZED_NOTEBOOK_ID },
     });
   };
-
-  // Mesma lista horizontal do modo "albums" do notebook: CreateCard seguido
-  // dos 5 poemas mais recentes, com o primeiro card centralizado na tela.
-  const rowData: RowItem[] = [
-    { kind: 'create' },
-    ...recentPoems.map((poem) => ({ kind: 'poem' as const, poem })),
-  ];
-
-  const sideInset = Math.max((screenWidth - cardSize) / 2, 24);
 
   return (
     <View className="flex-1 bg-backgroundTabs">
@@ -46,22 +34,48 @@ export default function HomeScreen() {
         </Text>
       </View>
 
-      <View className="flex-1 justify-center">
-        <FlatList
-          horizontal
-          data={rowData}
-          keyExtractor={(item) => (item.kind === 'create' ? 'create' : item.poem.id)}
-          showsHorizontalScrollIndicator={false}
-          style={{ height: cardSize, flexGrow: 0 }}
-          contentContainerStyle={{ paddingLeft: sideInset, paddingRight: 24 }}
-          renderItem={({ item }) =>
-            item.kind === 'create' ? (
-              <CreateCard label="Novo poema" onPress={createQuickPoem} textPosition="inside" />
-            ) : (
-              <PoemCard poem={item.poem} />
-            )
-          }
-        />
+      <View className="px-6 pt-6">
+        <Pressable
+          onPress={createQuickPoem}
+          style={subtleDividerStyle}
+          className="rounded-3xl border border-primaryTint-mid bg-backgroundReading p-5"
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="rounded-full bg-primaryTint-soft px-3 py-1">
+              <Text className="font-uiMedium text-xs text-primary">
+                Rascunho rápido · Sem categoria
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5">
+              <Ionicons name="create-outline" size={14} color={colors.white} />
+              <Text className="font-uiMedium text-xs text-white">Escrever</Text>
+            </View>
+          </View>
+          <Text className="mt-3 font-reading text-base italic text-muted">
+            {'"Qual verso veio à mente agora?"'}
+          </Text>
+        </Pressable>
+      </View>
+
+      <View className="mt-6 flex-1">
+        <Text className="mb-3 px-6 font-uiMedium text-xs text-muted">
+          Continuar escrevendo (Recentes)
+        </Text>
+        {recentPoems.length > 0 ? (
+          <FlatList
+            horizontal
+            data={recentPoems}
+            keyExtractor={(poem) => poem.id}
+            showsHorizontalScrollIndicator={false}
+            style={{ height: cardSize, flexGrow: 0 }}
+            contentContainerStyle={{ paddingHorizontal: 24 }}
+            renderItem={({ item }) => <PoemCard poem={item} />}
+          />
+        ) : (
+          <Text className="px-6 font-reading text-sm text-muted">
+            Seus últimos poemas editados aparecerão aqui.
+          </Text>
+        )}
       </View>
     </View>
   );
