@@ -30,6 +30,9 @@ function bumpRecent(recentIds: string[], poemId: string): string[] {
 type PoemsState = {
   poems: Poem[];
   recentPoemIds: string[];
+  // Efêmero (fora do partialize): identifica o poema recém-criado na
+  // sessão atual pra disparar o pop de entrada C1 sem animar no boot.
+  lastCreatedPoemId: string | null;
   // Recebe título/conteúdo porque o poema só é criado ao sair do editor,
   // se algo tiver sido escrito (rascunhos vazios nunca chegam ao storage).
   // Título vazio vira DEFAULT_POEM_TITLE.
@@ -43,6 +46,7 @@ export const usePoemsStore = create<PoemsState>()(
     (set) => ({
       poems: [],
       recentPoemIds: [],
+      lastCreatedPoemId: null,
       addPoem: (notebookId, data) => {
         const now = new Date().toISOString();
         const poem: Poem = {
@@ -59,6 +63,7 @@ export const usePoemsStore = create<PoemsState>()(
         set((state) => ({
           poems: [...state.poems, poem],
           recentPoemIds: bumpRecent(state.recentPoemIds, poem.id),
+          lastCreatedPoemId: poem.id,
         }));
         return poem;
       },
@@ -100,6 +105,10 @@ export const usePoemsStore = create<PoemsState>()(
     {
       name: 'poems-storage',
       storage: createJSONStorage(() => zustandStorage),
+      partialize: (state) => ({
+        poems: state.poems,
+        recentPoemIds: state.recentPoemIds,
+      }),
     }
   )
 );

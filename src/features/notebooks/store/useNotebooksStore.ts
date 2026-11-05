@@ -24,6 +24,9 @@ function ensureUncategorized(notebooks: Notebook[]): Notebook[] {
 
 type NotebooksState = {
   notebooks: Notebook[];
+  // Efêmero (não vai pro AsyncStorage): identifica o notebook recém-criado
+  // na sessão atual pra animar só a entrada dele (modelo C1).
+  lastCreatedNotebookId: string | null;
   addNotebook: (title: string, wallpaper?: string) => Notebook;
   removeNotebook: (id: string) => void;
 };
@@ -32,6 +35,7 @@ export const useNotebooksStore = create<NotebooksState>()(
   persist(
     (set) => ({
       notebooks: [uncategorizedNotebook],
+      lastCreatedNotebookId: null,
       addNotebook: (title, wallpaper) => {
         const notebook: Notebook = {
           id: Crypto.randomUUID(),
@@ -40,7 +44,10 @@ export const useNotebooksStore = create<NotebooksState>()(
           createdAt: new Date().toISOString(),
           createdBy: DEFAULT_AUTHOR,
         };
-        set((state) => ({ notebooks: [...state.notebooks, notebook] }));
+        set((state) => ({
+          notebooks: [...state.notebooks, notebook],
+          lastCreatedNotebookId: notebook.id,
+        }));
         return notebook;
       },
       removeNotebook: (id) => {
@@ -53,11 +60,13 @@ export const useNotebooksStore = create<NotebooksState>()(
     {
       name: 'notebooks-storage',
       storage: createJSONStorage(() => zustandStorage),
+      partialize: (state) => ({ notebooks: state.notebooks }),
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<NotebooksState> | undefined;
         return {
           ...currentState,
           ...persisted,
+          lastCreatedNotebookId: null,
           notebooks: ensureUncategorized(persisted?.notebooks ?? currentState.notebooks),
         };
       },
