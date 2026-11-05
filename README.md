@@ -1,4 +1,4 @@
-# Poética
+# Poética 📖
 
 App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos são organizados em **notebooks**, na mesma lógica de playlists: cada notebook agrupa poemas por assunto, gênero ou heterônimo.
 
