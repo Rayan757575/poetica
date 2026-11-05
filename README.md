@@ -49,8 +49,8 @@ Path aliases (resolvidos nativamente pelo Metro a partir do `tsconfig.json`, sem
 ```
 src/
   app/                      # Expo Router: só rotas/composição
-    index.tsx               # Splash (2s, redireciona para /welcome)
-    welcome.tsx             # Onboarding (UI estática, sem auth)
+    index.tsx               # Só redireciona para /welcome (a splash é a nativa)
+    welcome.tsx             # Onboarding (imagem + gradiente, UI estática, sem auth)
     (tabs)/
       _layout.tsx           # Tabs (Home, Notebooks) + notebook/[id] com href:null
       home.tsx
@@ -83,6 +83,8 @@ Os tokens em `src/shared/theme/` são a fonte única de verdade: `colors.ts` e `
 | `backgroundTabs` | `#F7F5F1` | Fundo de Home/Notebooks |
 | `backgroundReading` | `#FBF6EE` | Fundo do notebook-detail e do editor (sépia) |
 | `ink` | `#2B2320` | Texto do corpo do editor |
+| `surfaceBar` | `#FCFBF8` | Faixa entre o header e o conteúdo (`SortFilterBar`, resumo da Home) |
+| `muted` | `#6B665F` | Ícones e textos secundários discretos |
 | `notebookAccents` | terracotta, sage, mustard, dustyBlue | Cores de capa (ainda sem UI) |
 
 Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos quentes reduzem a fadiga ocular em leitura longa; Lemonada (arredondada) fica na marca e nos títulos, e Literata no corpo por ser desenhada para leitura em tela.
@@ -104,7 +106,8 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 
 ### Navegação e visual
 - `ScreenHeader` tem fundo branco próprio e usa `useSafeAreaInsets()`.
-- `SortFilterBar` e o bloco de texto da Home usam `subtleDividerStyle` (borda fina + sombra leve), sem fundo próprio.
+- `ScreenHeader` (sem borda nas telas com faixa) e `SortFilterBar`/bloco de resumo da Home formam um só bloco: a faixa usa `surfaceBar` e `subtleDividerStyle` (borda só embaixo + sombra leve) para parecer sobreposta ao conteúdo.
+- A splash é só a nativa (plugin `expo-splash-screen`, imagem `assets/images/splash.png` com logo + "Poética"). No Expo Go ela não aparece, pois o Expo Go mostra a própria tela de carregamento; é preciso um dev client ou build para vê-la. No Android 12+ o sistema aplica máscara circular ao ícone, então a arte tem margem de segurança.
 - O ícone do toggle lista/grade mostra o modo que será alcançado ao tocar.
 - O `FlatList` usa `key={viewMode}`, pois `numColumns` não pode mudar sem remontar.
 
@@ -128,11 +131,11 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, *Science*); fundos
 
 **Pendente ou incerto**
 - Variante `textPosition="row"` do `CreateCard` (aprovada, ainda não escrita). É a próxima tarefa.
-- Ordenação (`SortOptionsSheet`) é só visual.
+- Ordenação (`SortOptionsSheet`) funciona em Notebooks (`recent` por `createdAt`, `alphabetical`, `creationOrder`) e no notebook (`recentlyUpdated` por `updatedAt`, `alphabetical`, `creationOrder`).
 - Ícones de busca e "+" em `ScreenHeader` de Notebooks estão inertes.
 - Sem autenticação real.
 - Sem UI para capa de notebook (`wallpaper` cai sempre em `vangogh-2.jpg`) nem para `notebookAccents`.
-- Lista de "últimos poemas" na Home: o dono reportou que não funciona, mas a revisão não achou bug. **Verificar em build real.**
+- Lista de "últimos poemas" na Home: voltou a ser renderizada (horizontal, logo após o `CreateCard`). **Validar em build real.**
 
 ## Roadmap
 
