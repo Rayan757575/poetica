@@ -158,8 +158,8 @@ Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, _Science_); fundos
 ## Roadmap
 
 1. **Fase 1 (em andamento):** recriar a funcionalidade da v1 em stack moderna.
-2. **Fase 2 (parcial):** nova identidade visual inspirada no Pinterest (paleta, tipografia, grid dinâmico).
-3. **Fase 3 (não iniciada):** editor com busca de sinônimos ao selecionar uma palavra, e possivelmente recursos estilo Kindle como a Wikipédia. Há um `TODO` em `src/app/poem/[id].tsx` apontando para `@10play/tentap-editor`.
+2. **Fase 2 (parcial):** nova identidade visual (paleta, tipografia, grid dinâmico).
+3. **Fase 3 (não iniciada):** editor com busca de sinônimos ao selecionar uma palavra, e possivelmente recursos estilo Kindle como a Wikipédia.
 
 ## Segurança
 
