@@ -193,7 +193,7 @@ export function NotebookFormSheet({
               multiline
               numberOfLines={2}
               textAlignVertical="top"
-              style={{ minHeight: 66, maxHeight: 86 }}
+              style={{ minHeight: 86, maxHeight: 86 }}
               className="mb-5 rounded-xl border border-border bg-backgroundReading px-3.5 py-3 font-reading text-sm leading-5 text-ink"
             />
 
