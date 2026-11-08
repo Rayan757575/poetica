@@ -5,7 +5,7 @@ import { colors } from '@/shared/theme/colors';
 // Garante que um deep link direto pra /notebooks/[id] ainda tenha a
 // lista "embaixo" na pilha (o voltar leva pra lista, não pra fora da aba).
 export const unstable_settings = {
-  initialRouteName: 'index',
+  anchor: 'index',
 };
 
 // Stack aninhado dentro da aba Notebooks: lista (index) → detalhe ([id])
