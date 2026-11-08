@@ -2,13 +2,17 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
 import { FlatList, LayoutAnimation, Pressable, View } from 'react-native';
 
+import { NotebookActionsSheet } from '@/features/notebooks/components/NotebookActionsSheet';
 import { NotebookCard } from '@/features/notebooks/components/NotebookCard';
+import { NotebookDeleteDialog } from '@/features/notebooks/components/NotebookDeleteDialog';
+import { NotebookFormSheet } from '@/features/notebooks/components/NotebookFormSheet';
 import { NotebookListItem } from '@/features/notebooks/components/NotebookListItem';
 import {
   UNCATEGORIZED_NOTEBOOK_ID,
   useNotebooksStore,
 } from '@/features/notebooks/store/useNotebooksStore';
 import type { Notebook } from '@/features/notebooks/types';
+import { usePoemsStore } from '@/features/poems/store/usePoemsStore';
 import { CreateCard } from '@/shared/components/CreateCard';
 import { CreatedItemTransition } from '@/shared/components/CreatedItemTransition';
 import { ProcessingFlash } from '@/shared/components/ProcessingFlash';
@@ -24,9 +28,19 @@ export default function NotebooksScreen() {
   const notebooks = useNotebooksStore((state) => state.notebooks);
   const lastCreatedNotebookId = useNotebooksStore((state) => state.lastCreatedNotebookId);
   const addNotebook = useNotebooksStore((state) => state.addNotebook);
+  const updateNotebook = useNotebooksStore((state) => state.updateNotebook);
+  const removeNotebook = useNotebooksStore((state) => state.removeNotebook);
+  const removePoemsByNotebook = usePoemsStore((state) => state.removePoemsByNotebook);
+
   const { viewMode, sortKey, toggleViewMode, setSortKey } = useScreenPreference('notebooks');
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
   const [sortFlashTrigger, setSortFlashTrigger] = useState(0);
+
+  const [formVisible, setFormVisible] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [editingNotebook, setEditingNotebook] = useState<Notebook | null>(null);
+  const [actionsNotebook, setActionsNotebook] = useState<Notebook | null>(null);
+  const [deletingNotebook, setDeletingNotebook] = useState<Notebook | null>(null);
 
   // Fecha o sheet ao escolher (padrão de apps como o Spotify) e dispara o
   // flash só quando a ordenação realmente muda.
@@ -42,16 +56,40 @@ export default function NotebooksScreen() {
   };
 
   // "Sem categoria" é fixo e não entra na contagem, então o primeiro
-  // notebook criado pelo usuário é "My poems 1".
-  const createNotebook = () => {
-    const userNotebooksCount = notebooks.filter(
-      (notebook) => notebook.id !== UNCATEGORIZED_NOTEBOOK_ID
-    ).length;
+  // notebook criado pelo usuário tem como sugestão "My poems 1".
+  const userNotebooksCount = useMemo(
+    () => notebooks.filter((notebook) => notebook.id !== UNCATEGORIZED_NOTEBOOK_ID).length,
+    [notebooks]
+  );
+
+  const openCreateNotebookSheet = () => {
+    setFormMode('create');
+    setEditingNotebook(null);
+    setFormVisible(true);
+  };
+
+  const handleLongPressNotebook = (notebook: Notebook) => {
+    if (notebook.id === UNCATEGORIZED_NOTEBOOK_ID) return;
+    setActionsNotebook(notebook);
+  };
+
+  const handleFormSubmit = (data: { title: string; description?: string; wallpaper?: string }) => {
+    setFormVisible(false);
+    if (formMode === 'edit' && editingNotebook) {
+      updateNotebook(editingNotebook.id, data);
+      return;
+    }
     LayoutAnimation.configureNext({
       duration: 210,
       update: { type: LayoutAnimation.Types.easeInEaseOut },
     });
-    addNotebook(`My poems ${userNotebooksCount + 1}`);
+    addNotebook(data.title, data.wallpaper, data.description);
+  };
+
+  const handleConfirmDelete = (notebook: Notebook) => {
+    setDeletingNotebook(null);
+    removePoemsByNotebook(notebook.id);
+    removeNotebook(notebook.id);
   };
 
   // Ordenação por chave do SortOptionsSheet. `slice()` evita mutar o array
@@ -77,6 +115,11 @@ export default function NotebooksScreen() {
     ...orderedNotebooks.map((notebook) => ({ kind: 'notebook' as const, notebook })),
   ];
 
+  const defaultFormTitle =
+    formMode === 'edit' && editingNotebook
+      ? editingNotebook.title
+      : `My poems ${userNotebooksCount + 1}`;
+
   return (
     <View className="flex-1 bg-backgroundTabs">
       <ScreenHeader
@@ -87,7 +130,7 @@ export default function NotebooksScreen() {
             <Pressable onPress={() => {}}>
               <Ionicons name="search-outline" size={22} color={colors.dark} />
             </Pressable>
-            <Pressable onPress={() => {}}>
+            <Pressable onPress={openCreateNotebookSheet} hitSlop={10}>
               <Ionicons name="add-outline" size={24} color={colors.dark} />
             </Pressable>
           </View>
@@ -115,7 +158,7 @@ export default function NotebooksScreen() {
                 <CreateCard
                   label="Novo notebook"
                   subtitle="Criar coleção de poemas"
-                  onPress={createNotebook}
+                  onPress={openCreateNotebookSheet}
                   textPosition={viewMode === 'albums' ? 'below' : 'row'}
                 />
               );
@@ -124,9 +167,12 @@ export default function NotebooksScreen() {
             return (
               <CreatedItemTransition isNew={isNew}>
                 {viewMode === 'albums' ? (
-                  <NotebookCard notebook={item.notebook} />
+                  <NotebookCard notebook={item.notebook} onLongPress={handleLongPressNotebook} />
                 ) : (
-                  <NotebookListItem notebook={item.notebook} />
+                  <NotebookListItem
+                    notebook={item.notebook}
+                    onLongPress={handleLongPressNotebook}
+                  />
                 )}
               </CreatedItemTransition>
             );
@@ -143,6 +189,36 @@ export default function NotebooksScreen() {
           { key: 'alphabetical', label: 'Alfabética' },
           { key: 'creationOrder', label: 'Ordem de criação' },
         ]}
+      />
+      <NotebookFormSheet
+        visible={formVisible}
+        mode={formMode}
+        defaultTitle={defaultFormTitle}
+        initialDescription={formMode === 'edit' ? editingNotebook?.description : undefined}
+        initialWallpaper={formMode === 'edit' ? editingNotebook?.wallpaper : undefined}
+        onClose={() => setFormVisible(false)}
+        onSubmit={handleFormSubmit}
+      />
+      <NotebookActionsSheet
+        visible={actionsNotebook !== null}
+        notebook={actionsNotebook}
+        onClose={() => setActionsNotebook(null)}
+        onEdit={(notebook) => {
+          setActionsNotebook(null);
+          setFormMode('edit');
+          setEditingNotebook(notebook);
+          setFormVisible(true);
+        }}
+        onDelete={(notebook) => {
+          setActionsNotebook(null);
+          setDeletingNotebook(notebook);
+        }}
+      />
+      <NotebookDeleteDialog
+        visible={deletingNotebook !== null}
+        notebook={deletingNotebook}
+        onCancel={() => setDeletingNotebook(null)}
+        onConfirm={handleConfirmDelete}
       />
     </View>
   );

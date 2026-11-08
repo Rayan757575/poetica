@@ -6,10 +6,19 @@ import type { Notebook } from '../types';
 
 const notebookDefaultImage = require('@/assets/images/vangogh-2.jpg');
 
-export function NotebookCard({ notebook }: { notebook: Notebook }) {
+type NotebookCardProps = {
+  notebook: Notebook;
+  onLongPress?: (notebook: Notebook) => void;
+};
+
+export function NotebookCard({ notebook, onLongPress }: NotebookCardProps) {
   return (
     <Link href={`/notebooks/${notebook.id}`} asChild>
-      <Pressable className="mb-6 items-center" style={{ width: cardSize }}>
+      <Pressable
+        onLongPress={() => onLongPress?.(notebook)}
+        className="mb-6 items-center"
+        style={{ width: cardSize }}
+      >
         <Image
           source={notebook.wallpaper ? { uri: notebook.wallpaper } : notebookDefaultImage}
           style={{ width: cardSize, height: cardSize, borderRadius: cardRadius }}

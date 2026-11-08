@@ -6,13 +6,17 @@ import type { Notebook } from '../types';
 
 const notebookDefaultImage = require('@/assets/images/vangogh-2.jpg');
 
+type NotebookListItemProps = {
+  notebook: Notebook;
+  onLongPress?: (notebook: Notebook) => void;
+};
+
 // Variante em linha do NotebookCard — imagem à esquerda, título do
-// lado, createdBy embaixo. Baseado na descrição em texto (a imagem de
-// referência "RAP" não veio anexada); ajusto quando você mandar.
-export function NotebookListItem({ notebook }: { notebook: Notebook }) {
+// lado, createdBy embaixo.
+export function NotebookListItem({ notebook, onLongPress }: NotebookListItemProps) {
   return (
     <Link href={`/notebooks/${notebook.id}`} asChild>
-      <Pressable className="mb-4 flex-row items-center">
+      <Pressable onLongPress={() => onLongPress?.(notebook)} className="mb-4 flex-row items-center">
         <Image
           source={notebook.wallpaper ? { uri: notebook.wallpaper } : notebookDefaultImage}
           style={{ width: listThumbSize, height: listThumbSize, borderRadius: listThumbRadius }}
