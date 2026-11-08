@@ -41,35 +41,44 @@ export function NotebookActionsSheet({
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: SHEET_OFFSET,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (finished) setModalVisible(false);
+      backdropOpacity.setValue(0);
+      sheetTranslateY.setValue(SHEET_OFFSET);
+
+      const frame = requestAnimationFrame(() => {
+        Animated.parallel([
+          Animated.timing(backdropOpacity, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(sheetTranslateY, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+        ]).start();
       });
+
+      return () => cancelAnimationFrame(frame);
     }
-  }, [visible, backdropOpacity, sheetTranslateY]);
+
+    if (!modalVisible) return;
+
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(sheetTranslateY, {
+        toValue: SHEET_OFFSET,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) setModalVisible(false);
+    });
+  }, [visible, modalVisible, backdropOpacity, sheetTranslateY]);
 
   if (!renderedNotebook) return null;
 
@@ -90,63 +99,62 @@ export function NotebookActionsSheet({
           <Pressable style={{ flex: 1 }} onPress={onClose} />
         </Animated.View>
 
-        <Animated.View
-          style={{ transform: [{ translateY: sheetTranslateY }] }}
-          className="rounded-t-3xl bg-surfaceElevated px-6 pb-8 pt-4"
-        >
-          <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />
+        <Animated.View style={{ transform: [{ translateY: sheetTranslateY }] }}>
+          <View className="rounded-t-3xl bg-surfaceElevated px-6 pb-8 pt-4">
+            <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />
 
-          <View className="flex-row items-center">
-            <Image
-              source={
-                renderedNotebook.wallpaper
-                  ? { uri: renderedNotebook.wallpaper }
-                  : notebookDefaultImage
-              }
-              style={{
-                width: listThumbSize,
-                height: listThumbSize,
-                borderRadius: listThumbRadius,
-              }}
-            />
-            <View className="ml-3.5 flex-1">
-              <Text className="font-regular text-base text-primary" numberOfLines={1}>
-                {renderedNotebook.title}
-              </Text>
-              <Text className="mt-0.5 font-ui text-xs text-muted" numberOfLines={1}>
-                {renderedNotebook.description || renderedNotebook.createdBy}
-              </Text>
+            <View className="flex-row items-center">
+              <Image
+                source={
+                  renderedNotebook.wallpaper
+                    ? { uri: renderedNotebook.wallpaper }
+                    : notebookDefaultImage
+                }
+                style={{
+                  width: listThumbSize,
+                  height: listThumbSize,
+                  borderRadius: listThumbRadius,
+                }}
+              />
+              <View className="ml-3.5 flex-1">
+                <Text className="font-regular text-base text-primary" numberOfLines={1}>
+                  {renderedNotebook.title}
+                </Text>
+                <Text className="mt-0.5 font-ui text-xs text-muted" numberOfLines={1}>
+                  {renderedNotebook.description || renderedNotebook.createdBy}
+                </Text>
+              </View>
             </View>
+
+            <View className="my-3.5 h-[1px] w-full bg-border" />
+
+            <Pressable
+              onPress={() => onEdit(renderedNotebook)}
+              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
+            >
+              <Ionicons name="create-outline" size={18} color={colors.primary} />
+              <Text className="font-uiMedium text-sm text-ink">Editar</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                onShare?.(renderedNotebook);
+                onClose();
+              }}
+              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
+            >
+              <Ionicons name="share-social-outline" size={18} color={colors.primary} />
+              <Text className="font-uiMedium text-sm text-ink">Compartilhar</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => onDelete(renderedNotebook)}
+              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.primary} />
+              <Text className="font-uiMedium text-sm text-ink">Deletar</Text>
+            </Pressable>
           </View>
-
-          <View className="my-3.5 h-[1px] w-full bg-border" />
-
-          <Pressable
-            onPress={() => onEdit(renderedNotebook)}
-            className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-          >
-            <Ionicons name="create-outline" size={18} color={colors.primary} />
-            <Text className="font-uiMedium text-sm text-ink">Editar</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              onShare?.(renderedNotebook);
-              onClose();
-            }}
-            className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-          >
-            <Ionicons name="share-social-outline" size={18} color={colors.primary} />
-            <Text className="font-uiMedium text-sm text-ink">Compartilhar</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => onDelete(renderedNotebook)}
-            className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-          >
-            <Ionicons name="trash-outline" size={18} color={colors.primary} />
-            <Text className="font-uiMedium text-sm text-ink">Deletar</Text>
-          </Pressable>
         </Animated.View>
       </View>
     </Modal>

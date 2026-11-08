@@ -47,39 +47,48 @@ export function NotebookDeleteDialog({
 
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 180,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardScale, {
-          toValue: 1,
-          duration: 180,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 140,
-          easing: Easing.in(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardScale, {
-          toValue: 0.95,
-          duration: 140,
-          easing: Easing.in(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (finished) setModalVisible(false);
+      backdropOpacity.setValue(0);
+      cardScale.setValue(0.95);
+
+      const frame = requestAnimationFrame(() => {
+        Animated.parallel([
+          Animated.timing(backdropOpacity, {
+            toValue: 1,
+            duration: 180,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardScale, {
+            toValue: 1,
+            duration: 180,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ]).start();
       });
+
+      return () => cancelAnimationFrame(frame);
     }
-  }, [visible, backdropOpacity, cardScale]);
+
+    if (!modalVisible) return;
+
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 140,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardScale, {
+        toValue: 0.95,
+        duration: 140,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) setModalVisible(false);
+    });
+  }, [visible, modalVisible, backdropOpacity, cardScale]);
 
   if (!renderedNotebook) return null;
 
@@ -102,52 +111,54 @@ export function NotebookDeleteDialog({
 
         <Animated.View
           style={{
+            width: '100%',
             opacity: backdropOpacity,
             transform: [{ scale: cardScale }],
           }}
-          className="w-full rounded-3xl border border-border bg-surfaceElevated p-5"
         >
-          <View className="flex-row items-center">
-            <Image
-              source={
-                renderedNotebook.wallpaper
-                  ? { uri: renderedNotebook.wallpaper }
-                  : notebookDefaultImage
-              }
-              style={{
-                width: DIALOG_THUMB_SIZE,
-                height: DIALOG_THUMB_SIZE,
-                borderRadius: 8,
-              }}
-            />
-            <View className="ml-3 flex-1">
-              <Text className="font-ui text-xs text-muted">Confirmar exclusão</Text>
-              <Text className="mt-0.5 font-regular text-sm text-primary" numberOfLines={1}>
-                {renderedNotebook.title}
-              </Text>
+          <View className="w-full rounded-3xl border border-border bg-surfaceElevated p-5">
+            <View className="flex-row items-center">
+              <Image
+                source={
+                  renderedNotebook.wallpaper
+                    ? { uri: renderedNotebook.wallpaper }
+                    : notebookDefaultImage
+                }
+                style={{
+                  width: DIALOG_THUMB_SIZE,
+                  height: DIALOG_THUMB_SIZE,
+                  borderRadius: 8,
+                }}
+              />
+              <View className="ml-3 flex-1">
+                <Text className="font-ui text-xs text-muted">Confirmar exclusão</Text>
+                <Text className="mt-0.5 font-regular text-sm text-primary" numberOfLines={1}>
+                  {renderedNotebook.title}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          <View className="my-3.5 h-[1px] w-full bg-border" />
+            <View className="my-3.5 h-[1px] w-full bg-border" />
 
-          <Text className="mb-4 font-reading text-xs leading-relaxed text-ink">
-            Deseja deletar este notebook e os poemas associados a ele? Esta ação não pode ser
-            desfeita.
-          </Text>
+            <Text className="mb-4 font-reading text-xs leading-relaxed text-ink">
+              Deseja deletar este notebook e os poemas associados a ele? Esta ação não pode ser
+              desfeita.
+            </Text>
 
-          <View className="flex-row items-center justify-end gap-2.5">
-            <Pressable
-              onPress={onCancel}
-              className="rounded-full bg-primaryTint-soft px-4 py-2 active:bg-primaryTint-mid"
-            >
-              <Text className="font-uiMedium text-xs text-cursor">Cancelar</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => onConfirm(renderedNotebook)}
-              className="rounded-full bg-primary px-5 py-2 active:bg-primaryPressed"
-            >
-              <Text className="font-uiMedium text-xs text-white">Deletar</Text>
-            </Pressable>
+            <View className="flex-row items-center justify-end gap-2.5">
+              <Pressable
+                onPress={onCancel}
+                className="rounded-full bg-primaryTint-soft px-4 py-2 active:bg-primaryTint-mid"
+              >
+                <Text className="font-uiMedium text-xs text-cursor">Cancelar</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => onConfirm(renderedNotebook)}
+                className="rounded-full bg-primary px-5 py-2 active:bg-primaryPressed"
+              >
+                <Text className="font-uiMedium text-xs text-white">Deletar</Text>
+              </Pressable>
+            </View>
           </View>
         </Animated.View>
       </View>

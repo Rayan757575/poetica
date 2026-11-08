@@ -19,6 +19,10 @@ const ROW_ICON_SIZE = Math.round(listThumbSize * 0.34);
 const CARD_CAPSULE_SIZE = Math.round(cardSize * 0.32);
 const CARD_ICON_SIZE = Math.round(cardSize * 0.18);
 
+// Nota técnica: no NativeWind v4, `Animated.View` não passa pelo `cssInterop`
+// (então `className` nele é ignorado). Por isso o `Animated.View` recebe
+// apenas `style={{ transform: [{ scale }] }}` por fora, e o `Pressable`
+// interno preserva seu `className` e área de toque.
 export function CreateCard({ label, subtitle, onPress, textPosition = 'below' }: CreateCardProps) {
   const scale = useAnimatedValue(1);
 
@@ -42,13 +46,13 @@ export function CreateCard({ label, subtitle, onPress, textPosition = 'below' }:
 
   if (textPosition === 'row') {
     return (
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        className="mb-4"
-      >
-        <Animated.View className="flex-row items-center" style={{ transform: [{ scale }] }}>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Pressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          className="mb-4 flex-row items-center"
+        >
           <View
             className="items-center justify-center border border-primaryTint-mid bg-primaryTint-soft"
             style={{ width: listThumbSize, height: listThumbSize, borderRadius: listThumbRadius }}
@@ -64,23 +68,23 @@ export function CreateCard({ label, subtitle, onPress, textPosition = 'below' }:
             <Text className="font-regular text-base text-primary">{label}</Text>
             {subtitle && <Text className="mt-1 text-xs text-muted">{subtitle}</Text>}
           </View>
-        </Animated.View>
-      </Pressable>
+        </Pressable>
+      </Animated.View>
     );
   }
 
   const isInside = textPosition === 'inside';
 
   return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      className={
-        textPosition === 'below' ? 'mb-6 items-center' : 'mr-6 items-center justify-center'
-      }
-    >
-      <Animated.View className="items-center" style={{ transform: [{ scale }] }}>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        className={
+          textPosition === 'below' ? 'mb-6 items-center' : 'mr-6 items-center justify-center'
+        }
+      >
         <View
           className="items-center justify-center border border-primaryTint-mid bg-primaryTint-soft px-3"
           style={{ width: cardSize, height: cardSize, borderRadius: cardRadius }}
@@ -111,7 +115,7 @@ export function CreateCard({ label, subtitle, onPress, textPosition = 'below' }:
         {textPosition === 'below' && (
           <Text className="mt-1 font-regular text-xs text-primary">{label}</Text>
         )}
-      </Animated.View>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 }

@@ -60,8 +60,8 @@ export function ProcessingFlash({ trigger, children }: ProcessingFlashProps) {
   return (
     <View className="flex-1 overflow-hidden">
       <Animated.View
-        className="flex-1"
         style={{
+          flex: 1,
           opacity: contentProgress.interpolate({
             inputRange: [0, 1],
             outputRange: [0.25, 1],
