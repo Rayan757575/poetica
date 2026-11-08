@@ -126,34 +126,36 @@ export function NotebookActionsSheet({
               </View>
             </View>
 
-            <View className="my-3.5 h-[1px] w-full bg-border" />
+            <View className="my-4 h-[1px] w-full bg-border" />
 
-            <Pressable
-              onPress={() => onEdit(renderedNotebook)}
-              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-            >
-              <Ionicons name="create-outline" size={18} color={colors.primary} />
-              <Text className="font-uiMedium text-sm text-ink">Editar</Text>
-            </Pressable>
+            <View className="gap-1">
+              <Pressable
+                onPress={() => onEdit(renderedNotebook)}
+                className="flex-row items-center gap-3.5 rounded-xl px-3 py-3.5 active:bg-backgroundTabs"
+              >
+                <Ionicons name="create-outline" size={20} color={colors.primary} />
+                <Text className="font-uiMedium text-base text-ink">Editar</Text>
+              </Pressable>
 
-            <Pressable
-              onPress={() => {
-                onShare?.(renderedNotebook);
-                onClose();
-              }}
-              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-            >
-              <Ionicons name="share-social-outline" size={18} color={colors.primary} />
-              <Text className="font-uiMedium text-sm text-ink">Compartilhar</Text>
-            </Pressable>
+              <Pressable
+                onPress={() => {
+                  onShare?.(renderedNotebook);
+                  onClose();
+                }}
+                className="flex-row items-center gap-3.5 rounded-xl px-3 py-3.5 active:bg-backgroundTabs"
+              >
+                <Ionicons name="share-social-outline" size={20} color={colors.primary} />
+                <Text className="font-uiMedium text-base text-ink">Compartilhar</Text>
+              </Pressable>
 
-            <Pressable
-              onPress={() => onDelete(renderedNotebook)}
-              className="flex-row items-center gap-3 rounded-xl px-2.5 py-3 active:bg-backgroundTabs"
-            >
-              <Ionicons name="trash-outline" size={18} color={colors.primary} />
-              <Text className="font-uiMedium text-sm text-ink">Deletar</Text>
-            </Pressable>
+              <Pressable
+                onPress={() => onDelete(renderedNotebook)}
+                className="flex-row items-center gap-3.5 rounded-xl px-3 py-3.5 active:bg-backgroundTabs"
+              >
+                <Ionicons name="trash-outline" size={20} color={colors.primary} />
+                <Text className="font-uiMedium text-base text-ink">Deletar</Text>
+              </Pressable>
+            </View>
           </View>
         </Animated.View>
       </View>

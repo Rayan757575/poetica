@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import { colors } from '@/shared/theme/colors';
-import { scale } from '@/shared/theme/metrics';
+import { listThumbRadius, listThumbSize } from '@/shared/theme/metrics';
 import type { Notebook } from '../types';
 
 const notebookDefaultImage = require('@/assets/images/vangogh-2.jpg');
@@ -22,8 +22,6 @@ type NotebookDeleteDialogProps = {
   onCancel: () => void;
   onConfirm: (notebook: Notebook) => void;
 };
-
-const DIALOG_THUMB_SIZE = scale(44);
 
 // Modelo Dialog 3: card flutuante centralizado sobre o `colors.backdrop`,
 // com animação rápida de opacity (0 -> 1) e scale (0.95 -> 1) em 180ms.
@@ -116,7 +114,7 @@ export function NotebookDeleteDialog({
             transform: [{ scale: cardScale }],
           }}
         >
-          <View className="w-full rounded-3xl border border-border bg-surfaceElevated p-5">
+          <View className="w-full rounded-3xl border border-border bg-surfaceElevated p-6">
             <View className="flex-row items-center">
               <Image
                 source={
@@ -125,38 +123,38 @@ export function NotebookDeleteDialog({
                     : notebookDefaultImage
                 }
                 style={{
-                  width: DIALOG_THUMB_SIZE,
-                  height: DIALOG_THUMB_SIZE,
-                  borderRadius: 8,
+                  width: listThumbSize,
+                  height: listThumbSize,
+                  borderRadius: listThumbRadius,
                 }}
               />
-              <View className="ml-3 flex-1">
+              <View className="ml-3.5 flex-1">
                 <Text className="font-ui text-xs text-muted">Confirmar exclusão</Text>
-                <Text className="mt-0.5 font-regular text-sm text-primary" numberOfLines={1}>
+                <Text className="mt-0.5 font-regular text-base text-primary" numberOfLines={1}>
                   {renderedNotebook.title}
                 </Text>
               </View>
             </View>
 
-            <View className="my-3.5 h-[1px] w-full bg-border" />
+            <View className="my-4 h-[1px] w-full bg-border" />
 
-            <Text className="mb-4 font-reading text-xs leading-relaxed text-ink">
+            <Text className="mb-6 font-reading text-sm leading-relaxed text-ink">
               Deseja deletar este notebook e os poemas associados a ele? Esta ação não pode ser
               desfeita.
             </Text>
 
-            <View className="flex-row items-center justify-end gap-2.5">
+            <View className="flex-row items-center justify-end gap-3">
               <Pressable
                 onPress={onCancel}
-                className="rounded-full bg-primaryTint-soft px-4 py-2 active:bg-primaryTint-mid"
+                className="min-w-[104px] items-center justify-center rounded-full bg-primaryTint-soft px-5 py-2.5 active:bg-primaryTint-mid"
               >
-                <Text className="font-uiMedium text-xs text-cursor">Cancelar</Text>
+                <Text className="font-uiMedium text-sm text-cursor">Cancelar</Text>
               </Pressable>
               <Pressable
                 onPress={() => onConfirm(renderedNotebook)}
-                className="rounded-full bg-primary px-5 py-2 active:bg-primaryPressed"
+                className="min-w-[104px] items-center justify-center rounded-full bg-primary px-6 py-2.5 active:bg-primaryPressed"
               >
-                <Text className="font-uiMedium text-xs text-white">Deletar</Text>
+                <Text className="font-uiMedium text-sm text-white">Deletar</Text>
               </Pressable>
             </View>
           </View>

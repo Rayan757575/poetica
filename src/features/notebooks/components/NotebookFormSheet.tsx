@@ -139,7 +139,7 @@ export function NotebookFormSheet({
 
         <Animated.View style={{ transform: [{ translateY: sheetTranslateY }] }}>
           <View className="rounded-t-3xl bg-surfaceElevated px-6 pb-8 pt-4">
-            <View className="mb-4 h-1 w-10 self-center rounded-full bg-border" />
+            <View className="mb-5 h-1 w-10 self-center rounded-full bg-border" />
 
             <View className="flex-row items-center">
               <Pressable style={{ width: listThumbSize, height: listThumbSize }}>
@@ -152,8 +152,8 @@ export function NotebookFormSheet({
                 </View>
               </Pressable>
 
-              <View className="ml-3.5 flex-1">
-                <Text className="mb-1 font-ui text-xs text-muted">
+              <View className="ml-4 flex-1">
+                <Text className="mb-1.5 font-ui text-xs text-muted">
                   {mode === 'edit' ? 'Editar notebook' : 'Novo notebook'}
                 </Text>
                 <TextInput
@@ -167,12 +167,21 @@ export function NotebookFormSheet({
                   placeholderTextColor={colors.placeholder}
                   returnKeyType="done"
                   onSubmitEditing={handleSubmit}
-                  className="rounded-xl border border-primary bg-backgroundReading px-3 py-2 font-regular text-xs text-ink"
+                  numberOfLines={1}
+                  textAlign="left"
+                  textAlignVertical="center"
+                  style={{
+                    height: 44,
+                    fontSize: 14,
+                    paddingVertical: 0,
+                    includeFontPadding: false,
+                  }}
+                  className="rounded-xl border border-primary bg-backgroundReading px-3.5 font-regular text-ink"
                 />
               </View>
             </View>
 
-            <View className="my-4 h-[1px] w-full bg-border" />
+            <View className="my-5 h-[1px] w-full bg-border" />
 
             <TextInput
               value={description}
@@ -184,21 +193,22 @@ export function NotebookFormSheet({
               multiline
               numberOfLines={3}
               textAlignVertical="top"
-              className="mb-4 min-h-[64px] rounded-xl border border-border bg-backgroundReading px-3.5 py-2.5 font-reading text-xs text-ink"
+              style={{ height: 80 }}
+              className="mb-5 rounded-xl border border-border bg-backgroundReading px-3.5 py-3 font-reading text-sm leading-5 text-ink"
             />
 
-            <View className="flex-row items-center justify-end gap-2.5">
+            <View className="flex-row items-center justify-end gap-3">
               <Pressable
                 onPress={onClose}
-                className="rounded-full bg-backgroundTabs px-4 py-2 active:opacity-80"
+                className="min-w-[104px] items-center justify-center rounded-full bg-backgroundTabs px-5 py-2.5 active:opacity-80"
               >
-                <Text className="font-uiMedium text-xs text-muted">Cancelar</Text>
+                <Text className="font-uiMedium text-sm text-muted">Cancelar</Text>
               </Pressable>
               <Pressable
                 onPress={handleSubmit}
-                className="rounded-full bg-primary px-5 py-2 active:bg-primaryPressed"
+                className="min-w-[104px] items-center justify-center rounded-full bg-primary px-6 py-2.5 active:bg-primaryPressed"
               >
-                <Text className="font-uiMedium text-xs text-white">
+                <Text className="font-uiMedium text-sm text-white">
                   {mode === 'edit' ? 'Salvar' : 'Criar'}
                 </Text>
               </Pressable>
