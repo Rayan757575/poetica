@@ -191,9 +191,9 @@ export function NotebookFormSheet({
               selectionColor={colors.selection}
               cursorColor={colors.cursor}
               multiline
-              numberOfLines={3}
+              numberOfLines={2}
               textAlignVertical="top"
-              style={{ height: 80 }}
+              style={{ minHeight: 66, maxHeight: 86 }}
               className="mb-5 rounded-xl border border-border bg-backgroundReading px-3.5 py-3 font-reading text-sm leading-5 text-ink"
             />
 
