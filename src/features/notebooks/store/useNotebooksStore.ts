@@ -27,7 +27,11 @@ type NotebooksState = {
   // Efêmero (não vai pro AsyncStorage): identifica o notebook recém-criado
   // na sessão atual pra animar só a entrada dele (modelo C1).
   lastCreatedNotebookId: string | null;
-  addNotebook: (title: string, wallpaper?: string) => Notebook;
+  addNotebook: (title: string, wallpaper?: string, description?: string) => Notebook;
+  updateNotebook: (
+    id: string,
+    patch: Partial<Pick<Notebook, 'title' | 'description' | 'wallpaper'>>
+  ) => void;
   removeNotebook: (id: string) => void;
 };
 
@@ -36,10 +40,13 @@ export const useNotebooksStore = create<NotebooksState>()(
     (set) => ({
       notebooks: [uncategorizedNotebook],
       lastCreatedNotebookId: null,
-      addNotebook: (title, wallpaper) => {
+      addNotebook: (title, wallpaper, description) => {
+        const trimmedTitle = title.trim();
+        const trimmedDescription = description?.trim();
         const notebook: Notebook = {
           id: Crypto.randomUUID(),
-          title,
+          title: trimmedTitle || title,
+          description: trimmedDescription ? trimmedDescription : undefined,
           wallpaper,
           createdAt: new Date().toISOString(),
           createdBy: DEFAULT_AUTHOR,
@@ -49,6 +56,30 @@ export const useNotebooksStore = create<NotebooksState>()(
           lastCreatedNotebookId: notebook.id,
         }));
         return notebook;
+      },
+      updateNotebook: (id, patch) => {
+        if (id === UNCATEGORIZED_NOTEBOOK_ID) return;
+        set((state) => ({
+          notebooks: state.notebooks.map((notebook) => {
+            if (notebook.id !== id) return notebook;
+            const nextTitle =
+              patch.title !== undefined ? patch.title.trim() || notebook.title : notebook.title;
+            const nextDescription =
+              'description' in patch
+                ? patch.description?.trim()
+                  ? patch.description.trim()
+                  : undefined
+                : notebook.description;
+            const nextWallpaper = 'wallpaper' in patch ? patch.wallpaper : notebook.wallpaper;
+
+            return {
+              ...notebook,
+              title: nextTitle,
+              description: nextDescription,
+              wallpaper: nextWallpaper,
+            };
+          }),
+        }));
       },
       removeNotebook: (id) => {
         if (id === UNCATEGORIZED_NOTEBOOK_ID) return;
