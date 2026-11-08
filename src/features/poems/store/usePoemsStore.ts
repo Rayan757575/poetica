@@ -39,6 +39,7 @@ type PoemsState = {
   addPoem: (notebookId: string, data: Pick<Poem, 'title' | 'content'>) => Poem;
   updatePoem: (id: string, patch: Partial<Pick<Poem, 'title' | 'content'>>) => void;
   removePoem: (id: string) => void;
+  removePoemsByNotebook: (notebookId: string) => void;
 };
 
 export const usePoemsStore = create<PoemsState>()(
@@ -101,6 +102,16 @@ export const usePoemsStore = create<PoemsState>()(
           poems: state.poems.filter((poem) => poem.id !== id),
           recentPoemIds: state.recentPoemIds.filter((poemId) => poemId !== id),
         })),
+      removePoemsByNotebook: (notebookId) =>
+        set((state) => {
+          const removedIds = new Set(
+            state.poems.filter((poem) => poem.notebookId === notebookId).map((poem) => poem.id)
+          );
+          return {
+            poems: state.poems.filter((poem) => poem.notebookId !== notebookId),
+            recentPoemIds: state.recentPoemIds.filter((poemId) => !removedIds.has(poemId)),
+          };
+        }),
     }),
     {
       name: 'poems-storage',
