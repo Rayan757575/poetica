@@ -1,8 +1,8 @@
 # Poética 📖
 
-App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos são organizados em **notebooks**, na mesma lógica de playlists: cada notebook agrupa poemas por assunto, gênero ou heterônimo.
+App mobile de escrita criativa e poesia desenvolvido em **React Native + Expo**. Os textos são organizados em **notebooks**, seguindo a lógica de coleções literárias: cada notebook agrupa poemas por temática, gênero ou heterônimo.
 
-> Este repositório é a **v2**, reescrita do zero sobre o mesmo repositório do projeto original (histórico antigo sobrescrito via `git push --force`). Também é uma peça de portfólio profissional.
+> Este repositório abriga a **v2** do aplicativo, reescrita em arquitetura moderna como projeto autoral e peça de portfólio profissional.
 
 ## Sumário
 
@@ -10,12 +10,6 @@ App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos sã
 - [Setup](#setup)
 - [Estrutura de pastas](#estrutura-de-pastas)
 - [Design system](#design-system)
-- [Regras de negócio](#regras-de-negócio)
-- [Decisões técnicas](#decisões-técnicas)
-- [Estado atual](#estado-atual)
-- [Roadmap](#roadmap)
-- [Segurança](#segurança)
-- [Convenções do projeto](#convenções-do-projeto)
 
 ## Stack
 
@@ -24,12 +18,10 @@ App mobile de escrita (poesia e afins) em **React Native + Expo**. Os textos sã
 | Base           | Expo SDK 57, React Native 0.86.3, React 19.2.3, TypeScript (`strict`)      |
 | Navegação      | Expo Router (file-based)                                                   |
 | Estado         | Zustand + `persist` com `@react-native-async-storage/async-storage`        |
-| Estilo         | NativeWind v4 (Tailwind)                                                   |
+| Estilo         | NativeWind v4 (Tailwind CSS)                                               |
 | Ícones         | `@expo/vector-icons/Ionicons`                                              |
 | Responsividade | `react-native-size-matters`                                                |
 | Fontes         | Lemonada (marca/títulos), Literata (corpo do editor), Inter (labels de UI) |
-
-O app é testado principalmente via **Expo Go**, o que restringe o uso de libs nativas.
 
 ## Setup
 
@@ -39,7 +31,7 @@ npx expo install --fix   # alinha as versões dos pacotes do Expo
 npx expo start
 ```
 
-Path aliases (resolvidos nativamente pelo Metro a partir do `tsconfig.json`, sem `babel-plugin-module-resolver`):
+Path aliases (resolvidos nativamente pelo Metro a partir do `tsconfig.json`):
 
 - `@/*` → `./src/*`
 - `@/assets/*` → `./assets/*`
@@ -48,127 +40,55 @@ Path aliases (resolvidos nativamente pelo Metro a partir do `tsconfig.json`, sem
 
 ```
 src/
-  app/                      # Expo Router: só rotas/composição
-    index.tsx               # Só redireciona para /welcome (a splash é a nativa)
-    welcome.tsx             # Onboarding (degradê dinâmico, UI estática, sem auth)
+  app/                      # Expo Router: rotas e composição de telas
+    index.tsx               # Redirecionamento inicial
+    welcome.tsx             # Tela de boas-vindas (onboarding)
     (tabs)/
-      _layout.tsx           # Tabs (Home, Notebooks)
-      home.tsx
+      _layout.tsx           # Navegação por abas (Home, Notebooks)
+      home.tsx              # Captura rápida e poemas recentes
       notebooks/
-        _layout.tsx         # Stack aninhado (lista → detalhe com transição nativa + navbar)
-        index.tsx           # Lista de notebooks
-        [id].tsx            # Detalhe do notebook (poemas)
-    poem/[id].tsx           # Editor (ou rascunho em /poem/new), fora de (tabs): sem navbar
+        _layout.tsx         # Stack aninhado de notebooks
+        index.tsx           # Listagem e gerenciamento de notebooks
+        [id].tsx            # Detalhe do notebook e listagem de poemas
+    poem/[id].tsx           # Editor imersivo de poemas
     +not-found.tsx
   features/
-    notebooks/              # components, store/useNotebooksStore.ts, types.ts
-    poems/                  # components (inclui PoemEditorHeader), store/usePoemsStore.ts, types/
+    notebooks/              # Componentes, store e tipagens de notebooks
+    poems/                  # Componentes, store e tipagens de poemas
   shared/
-    components/             # ScreenHeader, SortFilterBar, SortOptionsSheet, CreateCard, ProcessingFlash
-    lib/                    # storage.ts, api.ts
-    store/                  # useScreenPreferencesStore.ts (persiste viewMode e sortKey)
-    theme/                  # colors, typography, metrics, elevation, index
+    components/             # Componentes visuais e transições compartilhadas
+    lib/                    # Utilitários de persistência e infraestrutura
+    store/                  # Preferências persistidas de visualização e ordenação
+    theme/                  # Tokens de cores, tipografia, métricas e elevação
   global.css
-assets/images/              # logo, wallpapers, ícones
+assets/images/              # Marca, capas e ativos visuais
 ```
 
 ## Design system
 
-Os tokens em `src/shared/theme/` são a fonte única de verdade: `colors.ts` e `typography.ts` são importados diretamente pelo `tailwind.config.js`, sem duplicação.
+Os tokens em `src/shared/theme/` formam a fonte única de verdade visual do aplicativo, equilibrando dois momentos cognitivos: **exploração/organização** (guiada pelo azul central) e **introspecção/escrita** (apoiada por tons de papel sépia e tinta quente).
 
-| Token               | Valor                                 | Uso                                                                  |
-| ------------------- | ------------------------------------- | -------------------------------------------------------------------- |
-| `primary`           | `#0a63f4`                             | Cor central do app (decisão inegociável)                             |
-| `primaryPressed`    | `#084EC2`                             | Feedback tátil de pressão em ações primárias                         |
-| `cursor`            | `#3B7BE3`                             | Cursor de digitação no fundo sépia (contraste sem vibração elétrica) |
-| `selection`         | `#C8DCF8`                             | Seleção de texto aquarelada sobre o papel quente                     |
-| `white`             | `#FFFFFF`                             |                                                                      |
-| `light`             | `#F8F8FF`                             |                                                                      |
-| `secondary`         | `#D5DEEF`                             | Placeholder de capa de notebook                                      |
-| `dark`              | `#161616`                             | Texto padrão                                                         |
-| `backgroundTabs`    | `#F7F5F1`                             | Fundo de Home/Notebooks                                              |
-| `backgroundReading` | `#FBF6EE`                             | Fundo do notebook-detail e do editor (sépia)                         |
-| `ink`               | `#2B2320`                             | Texto do corpo do editor                                             |
-| `surfaceBar`        | `#FCFBF8`                             | Faixa entre o header e o conteúdo (`SortFilterBar`, resumo da Home)  |
-| `surfaceElevated`   | `#FFFDF9`                             | Superfície aquecida para modais e bottom sheets (`SortOptionsSheet`) |
-| `backdrop`          | `rgba(27, 22, 20, 0.45)`              | Escurecimento quente de modais e feedback de reordenação             |
-| `muted`             | `#6B665F`                             | Ícones e textos secundários discretos                                |
-| `placeholder`       | `#A39C93`                             | Placeholder silencioso do editor em grafite quente                   |
-| `border`            | `#E6E1D8`                             | Divisórias quentes com aspecto de papelaria                          |
-| `danger`            | `#C84B31`                             | Ação destrutiva (carmim/terracota queimado)                          |
-| `primaryTint`       | `soft` (`#EEF4FF`), `mid` (`#D9E7FE`) | Tons claros derivados do `primary` (degradê dinâmico da Welcome)     |
-| `notebookAccents`   | terracotta, sage, mustard, dustyBlue  | Cores de capa (ainda sem UI)                                         |
+| Valor                                 | Uso / Especificação                                                  |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `#0a63f4`                             | Cor primária central do aplicativo e foco de ação                    |
+| `#084EC2`                             | Feedback tátil de pressão em ações primárias                         |
+| `#3B7BE3`                             | Cursor de digitação no fundo sépia (contraste sem vibração elétrica) |
+| `#C8DCF8`                             | Seleção de texto aquarelada sobre o papel quente                     |
+| `#FFFFFF`                             | Branco puro para textos sobre fundos primários e destaques           |
+| `#F8F8FF`                             | Superfície clara de apoio                                            |
+| `#D5DEEF`                             | Placeholder secundário de capas                                      |
+| `#161616`                             | Texto escuro de alto contraste                                       |
+| `#F7F5F1`                             | Fundo de navegação das abas principais (Home e Notebooks)            |
+| `#FBF6EE`                             | Fundo de leitura e do editor de poemas (papel sépia)                 |
+| `#2B2320`                             | Tinta quente para o texto literário e corpo do editor                |
+| `#FCFBF8`                             | Superfície de faixas de controle, filtros e fichas literárias        |
+| `#FFFDF9`                             | Superfície aquecida para modais, diálogos e bottom sheets            |
+| `rgba(27, 22, 20, 0.45)`              | Escurecimento quente de fundo para modais e transições               |
+| `#6B665F`                             | Ícones e metadados secundários discretos                             |
+| `#A39C93`                             | Placeholders silenciosos em grafite quente                           |
+| `#E6E1D8`                             | Divisórias e bordas com aspecto de papelaria                         |
+| `#C84B31`                             | Ações destrutivas em tom carmim/terracota queimado                   |
+| `#EEF4FF` / `#D9E7FE`                 | Superfícies e bordas tonais derivadas da cor primária                |
+| Terracotta, Sage, Mustard, Dusty Blue | Paleta complementar de acentos para capas de coleções                |
 
-Racional: azul favorece tarefas criativas (Mehta & Zhu, 2009, _Science_); fundos quentes reduzem a fadiga ocular em leitura longa; Lemonada (arredondada) fica na marca e nos títulos, e Literata no corpo por ser desenhada para leitura em tela.
-
-## Regras de negócio
-
-### Notebooks
-
-- Existe o notebook fixo **"Sem categoria"** (`UNCATEGORIZED_NOTEBOOK_ID = 'uncategorized'`). Ele não pode ser removido, é seedado como primeiro item e reinjetado via `merge` do `persist` se faltar.
-- O contador de criação de novos notebooks ignora "Sem categoria", começando em **"My poems 1"**.
-- `createdBy`/`updatedBy`: `"você"` para o que o usuário cria e `"sistema"` para "Sem categoria". `createdBy` é exibido nas listas (`NotebookListItem` e `PoemListItem`).
-- Ordenação persistida por tela (`useScreenPreferencesStore`): em Notebooks suporta `recent` (`createdAt` mais recente primeiro), `alphabetical` e `creationOrder`; no detalhe do notebook suporta `recentlyUpdated` (`updatedAt`), `alphabetical` e `creationOrder`.
-- A migração retroativa de `createdBy` (`migrateNotebooks`) foi removida a pedido do dono. Não reintroduzir sem pedir.
-
-### Poemas
-
-- Campos de `Poem`: `id, notebookId, title, content, type, createdAt, createdBy, updatedAt, updatedBy`.
-- `PoemType = 'soneto' | 'haicai' | 'trova' | 'livre'`, com `'livre'` como padrão. Cada tipo tem um arquivo de metadados em `features/poems/types/` contendo só `{ id }`. Propriedades específicas ainda não foram definidas.
-- Criação em modo **rascunho** (`/poem/new?notebookId=...`): nada é salvo no store ao abrir o editor. O título padrão **"Novo poema"** fica como `placeholder`; ao sair do editor, o poema só é criado se título ou conteúdo tiverem algo escrito (se o título ficar em branco, recebe `"Novo poema"`).
-- O editor salva uma única vez no **unmount** (cleanup de `useEffect`, lendo refs atualizados nos handlers), cobrindo seta, botão físico e gesto de voltar sem custo por tecla digitada. Se título e conteúdo não mudaram em relação ao valor salvo, `updatePoem` não é disparado (evitando alterar `updatedAt` só por abrir o poema).
-- IDs de notebooks e poemas são gerados com `Crypto.randomUUID()` (`expo-crypto`).
-- `recentPoemIds` (últimos 5 poemas) é um array simples e não um LRU: com N=5 a diferença é irrelevante e serializa direto em JSON.
-
-### Navegação e visual
-
-- `ScreenHeader` tem fundo branco próprio e usa `useSafeAreaInsets()`.
-- `ScreenHeader` (sem borda nas telas com faixa) e `SortFilterBar`/bloco de resumo da Home formam um só bloco: a faixa usa `surfaceBar` e `subtleDividerStyle` (borda só embaixo + sombra leve) para parecer sobreposta ao conteúdo.
-- A splash é só a nativa (plugin `expo-splash-screen`, imagem `assets/images/splash.png` com logo + "Poética"). No Expo Go ela não aparece, pois o Expo Go mostra a própria tela de carregamento; é preciso um dev client ou build para vê-la. No Android 12+ o sistema aplica máscara circular ao ícone, então a arte tem margem de segurança.
-- O ícone do toggle lista/grade mostra o modo que será alcançado ao tocar.
-- O `FlatList` usa `key={viewMode}`, pois `numColumns` não pode mudar sem remontar.
-
-## Decisões técnicas
-
-- **AsyncStorage em vez de MMKV:** o MMKV exige dev client nativo e não roda no Expo Go. Para voltar a ele, gere um dev client (`npx expo run:android` ou EAS Build) e altere `src/shared/lib/storage.ts`.
-- **Responsividade só em dimensões cruas** (`style={}`) via `scale()`/`verticalScale()`/`moderateScale()`. As classes do Tailwind não são escaladas, porque o `tailwind.config.js` roda no build e não no dispositivo.
-- **Bottom sheet sem lib:** `SortOptionsSheet` usa `Modal` (`animationType="none"`) com `Animated`, com fade no fundo e slide no cartão separados.
-- **Zero dependências novas** quando a API nativa resolve.
-- `axios` existe em `shared/lib/api.ts`, mas nada o usa hoje.
-- Sem testes nem CI/CD.
-
-## Estado atual
-
-**Funciona**
-
-- Fluxo Splash → Welcome → Tabs (Home/Notebooks) → Notebook (transição nativa em Stack aninhado) → Editor.
-- Criação e listagem de notebooks e poemas (com rascunho que evita poemas vazios), edição de título e conteúdo.
-- Notebook "Sem categoria" protegido.
-- Toggle lista/grade (`CreateCard` acompanha o modo com `textPosition="row"` na lista) e ordenação com feedback visual (`ProcessingFlash`) e persistência (`useScreenPreferencesStore`).
-- Métricas padronizadas de cards e miniaturas em `src/shared/theme/metrics.ts` (`cardSize`, `cardRadius`, `listThumbSize`, `listThumbRadius`).
-- Componentes compartilhados (`ScreenHeader`, `PoemEditorHeader`, `SortFilterBar`, `SortOptionsSheet`, `CreateCard`, `ProcessingFlash`) e tokens centralizados.
-
-**Pendente ou incerto**
-
-- Ícones de busca e "+" em `ScreenHeader` de Notebooks, e ícones de download e menu em `PoemEditorHeader`, estão inertes.
-- Sem autenticação real.
-- Sem UI para capa de notebook (`wallpaper` cai sempre em `vangogh-2.jpg`) nem para `notebookAccents`.
-- Lista de "últimos poemas" na Home: renderizada horizontalmente logo após o `CreateCard`. **Validar em build real.**
-
-## Roadmap
-
-1. **Fase 1 (em andamento):** recriar a funcionalidade da v1 em stack moderna.
-2. **Fase 2 (parcial):** nova identidade visual (paleta, tipografia, grid dinâmico).
-3. **Fase 3 (não iniciada):** editor com busca de sinônimos ao selecionar uma palavra, e possivelmente recursos estilo Kindle como a Wikipédia.
-
-## Segurança
-
-O código da v1 tinha uma chave do RapidAPI hardcoded em `services/api/index.js`. Ela não foi trazida para a v2, mas commits antigos podem continuar acessíveis em forks ou clones feitos antes do force-push. **Confirme que a chave foi revogada no painel do RapidAPI.**
-
-## Convenções do projeto
-
-- Comentários, comunicação e copy de UI em **pt-BR**.
-- Diffs cirúrgicos: respeitar nomenclaturas e estruturas existentes.
-- Perguntar antes de decidir em pontos ambíguos ou de arquitetura cara de reverter.
-- Preferir a solução mais simples para o tamanho real do problema, e deixar explícito no código onde uma solução mais robusta caberia se a escala mudar.
-- Explicar o "porquê" das decisões não óbvias nos comentários.
+**Racional tipográfico e cromático:** O azul estimula tarefas criativas e organiza os pontos de ação (Mehta & Zhu, 2009, _Science_), enquanto os fundos aquecidos reduzem a fadiga ocular durante sessões prolongadas de escrita. A fonte **Lemonada** confere identidade autoral à marca e aos títulos, a **Literata** oferece conforto ótico para leitura e composição poética em tela, e a **Inter** assegura legibilidade neutra nos controles de interface.

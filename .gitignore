@@ -1,3 +1,6 @@
+# Local agent orchestration & prompts (sensitive / not tracked)
+.agents/
+
 node_modules/
 .expo/
 dist/
